@@ -1,6 +1,8 @@
 import React,  { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import { setChonkyDefaults } from 'chonky';
+import { ChonkyIconFA } from 'chonky-icon-fontawesome';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import store from './app/store'
@@ -8,6 +10,8 @@ import { Provider } from 'react-redux'
 import SuspenseContent from './containers/SuspenseContent';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+setChonkyDefaults({ iconComponent: ChonkyIconFA });
+
 root.render(
   // <React.StrictMode>
     <Suspense fallback={<SuspenseContent />}>
