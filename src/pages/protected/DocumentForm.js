@@ -4,9 +4,11 @@ import { setPageTitle } from "../../features/common/headerSlice";
 import StaticDataForm from "../../features/documentForms/StaticDataForm";
 import DynamicDataForm from "../../features/documentForms/DynamicDataForm";
 import ValidationModal from "../../features/documentForms/ValidationModal";
+import { jwtDecode } from "jwt-decode";
 
 function InternalPage() {
   const dispatch = useDispatch();
+  const [userEmail,setUserEmail] = useState("")
   const [staticData, setStaticData] = useState({
     shipToAddressLine1: "",
     shipToAddressLine2: "",
@@ -43,7 +45,17 @@ function InternalPage() {
   useEffect(() => {
     dispatch(setPageTitle({ title: "Document Form" }));
     fetchPOData();
-  }, []);
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        const email = decodedToken.email;
+        setUserEmail(email);
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }
+  }, [dispatch]);
 
   const handleGeneratePO = () => {
     const combinedDataArray = [
@@ -135,12 +147,14 @@ function InternalPage() {
             <StaticDataForm
               staticData={staticData}
               setStaticData={setStaticData}
+              userEmail = {userEmail}
             />
           </div>
           <div>
             <DynamicDataForm
               dynamicData={dynamicData}
               setDynamicData={setDynamicData}
+              userEmail = {userEmail}
             />
           </div>
           <div className="text-center mt-4 lg:col-span-2">
@@ -170,6 +184,7 @@ function InternalPage() {
         isOpen={isValidationModalOpen}
         onRequestClose={() => setValidationModalOpen(false)}
         combinedData={combinedData}
+        userEmail = {userEmail}
       />
     </div>
   );

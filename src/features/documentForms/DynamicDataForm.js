@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import EmptyModalTemplate from "./EmptyModalTemplate";
 
-const DynamicDataForm = ({ dynamicData, setDynamicData }) => {
+const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [additionalModal, setaddtionalModal] = useState(false);
   const [message, setMessage] = useState("");
@@ -16,6 +16,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData }) => {
     unitPrice: "",
     amount: "",
     type: "Non-Serialized",
+    id : ""
   });
 
   const [additionalData, setadditionalData] = useState({
@@ -95,6 +96,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData }) => {
           setItem({
             ...item,
             type: result.type || "Non-Serialized",
+            id : result.id,
           });
           setMessage(
             "A unit with this part number and part description already exists in the database."
@@ -135,6 +137,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData }) => {
       unitPrice: "",
       amount: "",
       type: "Non-Serialized",
+      id : "",
     });
   };
 
@@ -334,6 +337,12 @@ const DynamicDataForm = ({ dynamicData, setDynamicData }) => {
                 >
                   Amount
                 </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  ID
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -361,6 +370,9 @@ const DynamicDataForm = ({ dynamicData, setDynamicData }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {item.amount}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {item.id}
                     </td>
                   </tr>
                 ))}

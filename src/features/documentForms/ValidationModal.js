@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
+import InventoryModal from "./InventoryModal";
 
-const ValidationModal = ({ isOpen, onRequestClose, combinedData }) => {
+const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) => {
   const [validationFailed, setValidationFailed] = useState(false);
   const [errorMessages, setErrorMessages] = useState([]);
+  const [poData,setPOdata] = useState([]);
+  const [inventoryModal,setInventoryModal] = useState(false);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -105,38 +109,9 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData }) => {
 
   const handleConfirm = async () => {
     if (!validationFailed) {
-      try {
         const formattedData = formatDataForAPI();
-        const response = await fetch(
-          `${process.env.REACT_APP_NODE_API_SERVER}po/generate-po`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formattedData),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to generate PO.");
-        }
-
-        const blob = await response.blob();
-        console.log(JSON.stringify(formattedData));
-        const url = window.URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "generated-po.pdf";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        window.URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error("Error generating PO:", error);
-      }
+        setPOdata(formattedData);
+        setInventoryModal(true);
     }
   };
 
@@ -261,8 +236,10 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData }) => {
           </div>
         </div>
       </div>
+      {inventoryModal && <InventoryModal poData={poData} closeModal={()=> setInventoryModal(false)} userEmail={userEmail}/>}
     </div>
   );
 };
+
 
 export default ValidationModal;
