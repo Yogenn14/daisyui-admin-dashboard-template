@@ -322,7 +322,7 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
               </div>
             </div>
           </div>
-          {confirmationModal && <ConfirmationModal poData = {poData} bulkItem = {bulkItem} closeModal={()=>setConfirmationModal(false)}/>}
+          {confirmationModal && <ConfirmationModal poData = {poData} bulkItem = {bulkItem} closeModal={()=>setConfirmationModal(false)} userEmail={userEmail}/>}
         </div>
       </div>
     );

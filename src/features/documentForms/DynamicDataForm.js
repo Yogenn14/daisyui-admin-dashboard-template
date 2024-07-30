@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import EmptyModalTemplate from "./EmptyModalTemplate";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../common/headerSlice";
 
 const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -8,6 +10,18 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
   const [validated, setValidated] = useState(false);
   const [inventoryId, setInventoryId] = useState();
   const [newPNPD, setNewPNPD] = useState(false);
+  const [totalAmount,setTotalAmount] = useState(0);
+  const [newPN,setNewPN] = useState();
+  const [newPD,setNewPD] = useState();
+  const [type,setType] = useState("serialized");
+
+  const dispatch = useDispatch();
+
+
+  const calculateAmount = () => {
+    const amount = parseFloat(item.quantity) * parseFloat(item.unitPrice);
+    setItem({ ...item, amount: amount.toFixed(2) });
+  };
   const [item, setItem] = useState({
     partNo: "",
     description: "",
@@ -47,17 +61,18 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
     console.log("Dynamic Data", dynamicData);
   };
 
-  const calculateAmount = () => {
-    const quantity = parseFloat(item.quantity);
-    const unitPrice = parseFloat(item.unitPrice);
-    const amount =
-      isNaN(quantity) || isNaN(unitPrice) ? 0 : quantity * unitPrice;
-    setItem({ ...item, amount });
-  };
-
+ 
   const handleAddItem = () => {
     calculateAmount();
+    const updatedItems = [...dynamicData.items, item];
     setDynamicData({ ...dynamicData, items: [...dynamicData.items, item] });
+
+    const newTotalAmount = updatedItems.reduce((sum, currentItem) => {
+      return sum + parseFloat(currentItem.amount);
+    }, 0);
+
+    setTotalAmount(newTotalAmount);
+
     setItem({
       partNo: "",
       description: "",
@@ -102,11 +117,12 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
             "A unit with this part number and part description already exists in the database."
           );
         } else if (
-          result.error === "Part number and part description does not exist"
+          result.exist === "false"
         ) {
           setMessage(
             "This Part Number and Part Description constraint does not exist. Do you wish to add it into database"
           );
+          setNewPNPD(true);
         }
       } else {
         setMessage(result.message || "Validation failed");
@@ -123,6 +139,56 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
   const openAdditionalModal = () => {
     setaddtionalModal(true);
   };
+
+  const handleNewPNPD = async (partNo, description) => {
+    const requestBody = {
+      partNumber: partNo,
+      partDescription: description,
+      type: type.toLowerCase(), 
+      userEmail: userEmail
+    };
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_NODE_API_SERVER}inventory/addConstraint`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (response.ok) {
+        const responseData = await response.json()
+        dispatch(
+          showNotification({
+            message: "Added Constraint to database.",
+            status: 1,
+          })
+        );
+        setInventoryId(responseData.inventory.id)
+        setItem({partNo: partNo, description: description, type: type, id: responseData.inventory.id})
+        setValidated(true);
+        setMessage();
+      } else {
+        dispatch(
+            showNotification({
+              message: "Error adding constraint",
+              status: 0,
+            })
+          );
+          console.log(response)
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      dispatch(
+        showNotification({
+          message: "Error adding constraint",
+          status: 0,
+        })
+      );
+    }
+  };
+
 
   const closeModal = () => {
     setModalIsOpen(false);
@@ -141,16 +207,20 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
     });
   };
 
+  const handleTypeChange = (event) => {
+    setType(event.target.value); 
+  };
+
   return (
     <div className="form-container bg-white p-4 rounded-md">
       <h2 className="text-xl mb-4">Dynamic Data</h2>
       <form>
         {/* Overview Section */}
         <div className="mb-4">
-          <h3 className="text-lg font-bold mb-2">Overview</h3>
+          <h3 className="text-lg  mb-2">Overview</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 PO Number:
               </label>
               <input
@@ -163,7 +233,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
             </div>
 
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Date:
               </label>
               <input
@@ -175,7 +245,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Quotation Number:
               </label>
               <input
@@ -187,7 +257,20 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
+                Quotation Date:
+              </label>
+              <input
+                name="quotationDate"
+                type="date"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value={dynamicData.quotationDate}
+                onChange={handleChange}
+              />
+            </div>
+           
+            <div>
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Address Line 1
               </label>
               <input
@@ -199,7 +282,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Address Line 2
               </label>
               <input
@@ -211,7 +294,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Address Line 3
               </label>
               <input
@@ -223,7 +306,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Address Line 4
               </label>
               <input
@@ -235,7 +318,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Tel
               </label>
               <input
@@ -247,7 +330,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Email
               </label>
               <input
@@ -259,7 +342,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label className="block text-gray-700 text-sm  mb-2">
                 Vendor Attn
               </label>
               <input
@@ -274,9 +357,10 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
         </div>
 
         <div className="mb-4">
-          <h3 className="text-lg font-bold mb-2">Inventory Items</h3>
+          <h3 className="text-lg  mb-2">Inventory Items</h3>
         </div>
 
+       <div className="space-x-4">
         <button type="button" onClick={openModal} className="btn btn-sm">
           Add Parts/Item
         </button>
@@ -287,10 +371,11 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
         >
           Add Additional Record
         </button>
+        </div>
       </form>
 
       <div className="mt-4">
-        <h3 className="text-2xl mb-2 font-bold">Items List</h3>
+        <h3 className="text-2xl mb-2 ">Items List</h3>
         <div className="overflow-x-auto">
           <table className="table">
             <thead className="bg-gray-50">
@@ -388,7 +473,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
             {!validated ? (
               <>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm  mb-2">
                     Part Number:
                   </label>
                   <input
@@ -400,7 +485,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm  mb-2">
                     Description:
                   </label>
                   <input
@@ -419,16 +504,58 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                   Validate
                 </button>
 
-                {message && <div className="mt-2 text-red-600">{message}</div>}
+                {message &&  
+                <div className="space-y-2">
+                <div role="alert" className="alert mt-4">
+                <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                className="stroke-info h-6 w-6 shrink-0">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{message}</span>
+                    </div>
+                    <label className="input input-bordered flex items-center gap-2">
+                      Part Num
+                      <input type="text" className="grow" value={item.partNo} disabled/>
+                    </label>
+                    <label className="input input-bordered flex items-center gap-2">
+                      Part Desc
+                      <input type="text" className="grow" value={item.description} disabled />
+                    </label>
+                    <select className="select select-bordered w-full max-w-xs" value={type} onChange={handleTypeChange}>
+                      <option value="serialized">Serialized</option>
+                      <option value="non-serialized">Non-Serialized</option>
+                    </select>
+                    <div className="btn btn-sm w-full" onClick={()=>handleNewPNPD(item.partNo, item.description)}>Add</div>
+                    </div>
+                     }
               </>
             ) : (
               <>
                 {message && (
-                  <div className="mt-2 text-green-600">{message}</div>
-                )}
+                  <div role="alert" className="alert">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="stroke-info h-6 w-6 shrink-0">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>
+  <span>{message}</span>
+</div>                )}
 
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm  mb-2">
                     Type:
                   </label>
                   <select
@@ -437,12 +564,11 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                     onChange={handleItemChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   >
-                    <option value="Serialized">Serialized</option>
-                    <option value="Non-Serialized">Non-Serialized</option>
+                    <option value="Serialized">{item.type}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm  mb-2">
                     UOM:
                   </label>
                   <input
@@ -454,7 +580,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm  mb-2">
                     Quantity:
                   </label>
                   <input
@@ -468,7 +594,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-gray-700 text-sm  mb-2">
                     Unit Price:
                   </label>
                   <input
@@ -479,6 +605,19 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={item.unitPrice}
                     onChange={handleItemChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    Amount
+                  </label>
+                  <input
+                    name="amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.amount = item.quantity * item.unitPrice}
                   />
                 </div>
                 <button
@@ -628,9 +767,8 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
           </form>
         </EmptyModalTemplate>
       )}
-      <div className="btn btn-sm mt-6" onClick={handlePOGenerate}>
-        Log Data
-      </div>
+    
+    <div className="mt-2 ml-4">Total Price: {totalAmount}</div>
     </div>
   );
 };

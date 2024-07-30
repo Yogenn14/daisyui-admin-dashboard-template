@@ -180,15 +180,7 @@ function StaticDataForm({ staticData, setStaticData }) {
             onChange={handleChange}
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm mb-2">Notes</label>
-          <input
-            name="shipToAddressLine1"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={formData.notes}
-            onChange={handleChange}
-          />
-        </div>
+      
         <div className="mb-4">
           <label className="block text-gray-700 text-sm mb-2">
             Condition 1

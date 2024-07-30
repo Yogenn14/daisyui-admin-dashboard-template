@@ -4,9 +4,8 @@ import InventoryModal from "./InventoryModal";
 const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) => {
   const [validationFailed, setValidationFailed] = useState(false);
   const [errorMessages, setErrorMessages] = useState([]);
-  const [poData,setPOdata] = useState([]);
-  const [inventoryModal,setInventoryModal] = useState(false);
-
+  const [poData, setPOdata] = useState([]);
+  const [inventoryModal, setInventoryModal] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -83,7 +82,9 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
         case "condition2":
         case "condition3":
         case "poNumber":
-        case "date":
+        case "poDate":
+        case "quotationNumber":
+        case "quotationDate":
         case "vendorAddressLine1":
         case "vendorAddressLine2":
         case "vendorAddressLine3":
@@ -109,13 +110,16 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
 
   const handleConfirm = async () => {
     if (!validationFailed) {
-        const formattedData = formatDataForAPI();
-        setPOdata(formattedData);
-        setInventoryModal(true);
+      const formattedData = formatDataForAPI();
+      setPOdata(formattedData);
+      setInventoryModal(true);
     }
   };
 
   if (!isOpen) return null;
+
+  const nonItemFields = combinedData.filter((item) => item.key !== "items");
+  const itemFields = combinedData.find((item) => item.key === "items");
 
   return (
     <div
@@ -158,60 +162,48 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
                 )}
                 <div className="mt-2">
                   <ul className="text-sm text-gray-500">
-                    {combinedData.map((item, index) => (
+                    {nonItemFields.map((item, index) => (
                       <li key={index} className="mb-2">
-                        <strong>{item.key}:</strong>{" "}
-                        {item.key === "items" ? (
-                          <div className="overflow-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                              <thead className="bg-gray-50">
-                                <tr>
-                                  {Object.keys(JSON.parse(item.value[0])).map(
-                                    (subKey, subIndex) => (
-                                      <th
-                                        key={subIndex}
-                                        className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                      >
-                                        {subKey}
-                                      </th>
-                                    )
-                                  )}
-                                </tr>
-                              </thead>
-                              <tbody className="bg-white divide-y divide-gray-200">
-                                {item.value.map((subItem, subIndex) => (
-                                  <tr key={subIndex}>
-                                    {Object.values(JSON.parse(subItem)).map(
-                                      (subValue, subIndex) => (
-                                        <td
-                                          key={subIndex}
-                                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                        >
-                                          {subValue}
-                                        </td>
-                                      )
-                                    )}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : typeof item.value === "object" ? (
-                          <ul>
-                            {Object.entries(item.value).map(
-                              ([subKey, subValue], subIndex) => (
-                                <li key={subIndex}>
-                                  <strong>{subKey}:</strong> {subValue}
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        ) : (
-                          item.value
-                        )}
+                        <strong>{item.key}:</strong> {item.value}
                       </li>
                     ))}
                   </ul>
+                  {itemFields && (
+                    <div className="overflow-auto mt-4">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            {Object.keys(JSON.parse(itemFields.value[0])).map(
+                              (subKey, subIndex) => (
+                                <th
+                                  key={subIndex}
+                                  className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                  {subKey}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {itemFields.value.map((subItem, subIndex) => (
+                            <tr key={subIndex}>
+                              {Object.values(JSON.parse(subItem)).map(
+                                (subValue, subIndex) => (
+                                  <td
+                                    key={subIndex}
+                                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                  >
+                                    {subValue}
+                                  </td>
+                                )
+                              )}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -236,10 +228,15 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
           </div>
         </div>
       </div>
-      {inventoryModal && <InventoryModal poData={poData} closeModal={()=> setInventoryModal(false)} userEmail={userEmail}/>}
+      {inventoryModal && (
+        <InventoryModal
+          poData={poData}
+          closeModal={() => setInventoryModal(false)}
+          userEmail={userEmail}
+        />
+      )}
     </div>
   );
 };
-
 
 export default ValidationModal;

@@ -160,7 +160,7 @@ function InternalPage() {
           <div className="text-center mt-4 lg:col-span-2">
             <button
               onClick={handleGeneratePO}
-              className={`btn btn-md ${
+              className={`btn btn-md w-full ${
                 isItemsArrayEmpty() ? "btn-disabled" : ""
               }`}
             >
