@@ -67,13 +67,14 @@ const UnserializedForm = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Ensure form submission is prevented
+    console.log(convertedUnitPrice, convertedTotalPrice,conversionRate)
     if (validate()) {
       try {
         const submissionData = {
           ...formData,
           unitPrice: formData.currency === "MYR" ? convertedUnitPrice : formData.unitPrice,
           totalPrice: formData.currency === "MYR" ? convertedTotalPrice : totalPrice,
-          conversionRate: formData.currency === "MYR" ? conversionRate : 0,
+          conversionRate: formData.currency === "MYR" ? conversionRate[0] : 0,
         };
 
         const response = await fetch(
