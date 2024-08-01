@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../../common/headerSlice";
 
@@ -11,6 +11,7 @@ const UnserializedForm = ({
   updateCounter,
   setUpdateCounter,
   closeUnserializedModal,
+  conversionRate
 }) => {
   const [formData, setFormData] = useState({
     quantityChange: 0,
@@ -20,9 +21,27 @@ const UnserializedForm = ({
     date: "",
     userEmail: userEmail,
     supplier: "",
+    currency: "USD",
+    unitPrice: 0,
   });
   const [errors, setErrors] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [convertedUnitPrice, setConvertedUnitPrice] = useState(0);
+  const [convertedTotalPrice, setConvertedTotalPrice] = useState(0);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const price = formData.unitPrice * formData.quantityChange;
+    setTotalPrice(price);
+
+    if (formData.currency === "MYR") {
+      setConvertedUnitPrice(formData.unitPrice * conversionRate);
+      setConvertedTotalPrice(price * conversionRate);
+    } else {
+      setConvertedUnitPrice(0);
+      setConvertedTotalPrice(0);
+    }
+  }, [formData.unitPrice, formData.quantityChange, formData.currency, conversionRate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,9 +66,16 @@ const UnserializedForm = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Ensure form submission is prevented
     if (validate()) {
       try {
+        const submissionData = {
+          ...formData,
+          unitPrice: formData.currency === "MYR" ? convertedUnitPrice : formData.unitPrice,
+          totalPrice: formData.currency === "MYR" ? convertedTotalPrice : totalPrice,
+          conversionRate: formData.currency === "MYR" ? conversionRate : 0,
+        };
+
         const response = await fetch(
           `${process.env.REACT_APP_NODE_API_SERVER}inventory/addUnserializedItem/${inventoryId}`,
           {
@@ -57,10 +83,9 @@ const UnserializedForm = ({
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(submissionData),
           }
         );
-        console.log(JSON.stringify(formData), "body");
         const data = await response.json();
         if (response.ok) {
           closeModal();
@@ -89,7 +114,7 @@ const UnserializedForm = ({
         );
         console.log(error, "error");
       } finally {
-        closeUnserializedModal();
+      //closeUnserializedModal();
       }
     }
   };
@@ -104,11 +129,9 @@ const UnserializedForm = ({
         <p>Part Desc : {partDescription}</p>
         <p>Inventory ID : {inventoryId}</p>
 
-        <form>
+        <form onSubmit={handleSubmit}> {/* Ensure onSubmit handler is attached */}
           <div className="mb-4 mt-2">
-            <label className="block text-gray-700 text-sm">
-              Quantity Change
-            </label>
+            <label className="block text-gray-700 text-sm">Quantity Change</label>
             <input
               type="number"
               name="quantityChange"
@@ -150,9 +173,7 @@ const UnserializedForm = ({
             )}
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm">
-              Manufacturer OEM
-            </label>
+            <label className="block text-gray-700 text-sm">Manufacturer OEM</label>
             <input
               type="text"
               name="manufactureroem"
@@ -196,6 +217,73 @@ const UnserializedForm = ({
               <p className="text-red-500 text-sm">{errors.status}</p>
             )}
           </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm">Currency</label>
+            <select
+              name="currency"
+              value={formData.currency}
+              onChange={handleChange}
+              className="select select-bordered w-full select-xs"
+            >
+              <option value="USD">USD</option>
+              <option value="MYR">MYR</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm">Unit Price</label>
+            <input
+              type="number"
+              name="unitPrice"
+              step="0.01"
+              value={formData.unitPrice}
+              onChange={handleChange}
+              className="input input-bordered w-full input-xs"
+              required
+            />
+            {errors.unitPrice && (
+              <p className="text-red-500 text-sm">{errors.unitPrice}</p>
+            )}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm">Total Price</label>
+            <input
+              type="number"
+              value={totalPrice}
+              className="input input-bordered w-full input-xs"
+              disabled
+            />
+          </div>
+          {formData.currency === "MYR" && (
+            <>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Conversion Rate</label>
+                <input
+                  type="number"
+                  value={conversionRate}
+                  className="input input-bordered w-full input-xs"
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Converted Unit Price</label>
+                <input
+                  type="number"
+                  value={convertedUnitPrice}
+                  className="input input-bordered w-full input-xs"
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Converted Total Price</label>
+                <input
+                  type="number"
+                  value={convertedTotalPrice}
+                  className="input input-bordered w-full input-xs"
+                  disabled
+                />
+              </div>
+            </>
+          )}
           <div className="flex justify-end">
             <button
               type="button"
@@ -207,7 +295,6 @@ const UnserializedForm = ({
             <button
               type="submit"
               className="btn btn-primary btn-sm text-white"
-              onClick={handleSubmit}
             >
               Update
             </button>

@@ -53,6 +53,10 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
   const handleSubmit = async () => {
     const requestBody = {
       items: formData.flatMap((item) => {
+        if (item.type === "Additional" || item.type === "") {
+          return []; // Skip items of type "Additional"
+        }
+  
         if (item.type === "serialized") {
           return item.serialNumbers.map((serialNumber, index) => ({
             inventoryId: item.id,
@@ -79,6 +83,8 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
             manufactureroem: item.manufactureroem,
             condition: item.condition,
             status: item.status,
+            unitPrice: item.unitPrice,
+            totalPrice:item.amount,
             userEmail,
           };
         }
@@ -93,32 +99,31 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
         },
         body: JSON.stringify(requestBody),
       });
-       console.log(JSON.stringify(requestBody))
-       console.log(poData)
-
+      console.log(JSON.stringify(requestBody));
+      console.log(poData);
+  
       if (!response.ok) {
         const data = await response.json();
         const errorMessage = data.error;
         const updatedErrorMessage = errorMessage.replace(/items\[(\d+)\]/, (_, index) => `Form ${Number(index) + 1}`);
         setErrors([{ message: updatedErrorMessage }]);
-        setValidated(false)
-
+        setValidated(false);
+  
         throw new Error(updatedErrorMessage);
       }
-
+  
       setErrors([]);
-
-      if(response.ok) {
-        setValidated(true)  
-        setBulkItem(requestBody)
-      } 
-
-
+  
+      if (response.ok) {
+        setValidated(true);
+        setBulkItem(requestBody);
+      }
     } catch (error) {
       console.error("Error validating items:", error.message);
-      setValidated(false)
+      setValidated(false);
     }
   };
+  
 
 
   const handleNext = () =>{
@@ -138,9 +143,10 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
                     <div className="badge badge-ghost mr-2">STEP 2</div>
                     Inventory Items <div className="badge badge-outline">Assigned by: {userEmail}</div>
                   </h3>
-                
                   <div className="mt-2">
                     {formData.map((item, index) => (
+                       item.type !== "" && (
+
                       <div key={index} className="mb-4 p-4 border rounded-lg">
                         <h4 className="text-md font-medium text-gray-800">Item {index + 1}</h4>
                         <p>Part Number: {item.partNo}</p>
@@ -255,6 +261,7 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
                             </>
                           )}
                         </div>
+                                            )
                       ))}
                     </div>
                   </div>

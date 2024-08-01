@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { showNotification } from "../../common/headerSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import UnserializedForm from "./UnserializedForm";
 
 const UnserializedModal = ({
@@ -10,11 +10,13 @@ const UnserializedModal = ({
   setUpdateCounter,
   showUpdateModal,
   setShowUpdateModal,
+  conversionRate
 }) => {
   const [formData, setFormData] = useState({
     partDescription: "",
     partNumber: "",
     quantity: 0,
+    unitPrice: 0,
     type: "non-serialized",
     manufactureroem: "",
     condition: "NEW",
@@ -24,12 +26,28 @@ const UnserializedModal = ({
     outDate: null,
     userEmail: userEmail,
     supplier: "",
+    currency: "USD",
+    conversionRate: 0
   });
 
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [convertedUnitPrice, setConvertedUnitPrice] = useState(0);
+  const [convertedTotalPrice, setConvertedTotalPrice] = useState(0);
   const [errors, setErrors] = useState({});
   const [existMessage, setExistMessage] = useState();
   const [existInvId, setExistInvId] = useState();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setTotalPrice(formData.unitPrice * formData.quantity);
+    if (formData.currency === "MYR") {
+      setConvertedUnitPrice(formData.unitPrice * conversionRate);
+      setConvertedTotalPrice(formData.unitPrice * formData.quantity * conversionRate);
+    } else {
+      setConvertedUnitPrice(0);
+      setConvertedTotalPrice(0);
+    }
+  }, [formData.unitPrice, formData.quantity, formData.currency, conversionRate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,10 +58,11 @@ const UnserializedModal = ({
   };
 
   const validate = () => {
+    console.log("Validating form data:", formData);
     let tempErrors = {};
     if (!formData.partDescription)
       tempErrors.partDescription = "Part Description is required";
-    //if (!formData.partNumber) tempErrors.partNumber = "Part Number is required";
+    if (!formData.partNumber) tempErrors.partNumber = "Part Number is required";
     if (formData.quantity <= 0)
       tempErrors.quantity = "Quantity must be greater than zero";
     if (!formData.manufactureroem)
@@ -57,7 +76,19 @@ const UnserializedModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Submitting form");
     if (validate()) {
+      console.log("Form validated successfully");
+
+      const submissionData = {
+        ...formData,
+        unitPrice: formData.currency === "MYR" ? convertedUnitPrice : formData.unitPrice,
+        totalPrice: formData.currency === "MYR" ? convertedTotalPrice : totalPrice,
+        conversionRate : formData.currency === "MYR" ? conversionRate : 0
+      };
+  
+      console.log("Submission Data:", submissionData);
+  
       try {
         const response = await fetch(
           `${process.env.REACT_APP_NODE_API_SERVER}inventory/addInventoryItem`,
@@ -66,12 +97,13 @@ const UnserializedModal = ({
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(submissionData),
           }
         );
-
+  
         const data = await response.json();
-        console.log(JSON.stringify(formData));
+        console.log("Server Response:", data);
+  
         if (response.ok) {
           setUpdateCounter(updateCounter + 1);
           closeUnserializedModal();
@@ -84,19 +116,23 @@ const UnserializedModal = ({
         } else {
           if (data.error && data.inventoryId) {
             setExistMessage(
-              "The following unserialized item already exists in the database of GMT, please click button to ship in more item/stock to this particular item."
+              "The following unserialized item already exists in the database of GMT, please click the button to ship in more items/stock to this particular item."
             );
             setExistInvId(data.inventoryId);
           } else {
             alert(data.error || "An error occurred");
+            console.error("Error adding unserialized item:", data.error);
           }
         }
       } catch (error) {
         alert("An error occurred");
+        console.error("Error adding unserialized item:", error);
       }
+    } else {
+      console.log("Form validation failed", errors);
     }
   };
-
+  
   const handleAddMore = () => {
     setShowUpdateModal(true);
   };
@@ -199,16 +235,6 @@ const UnserializedModal = ({
                   <option value="REFURBISHED">REFURBISHED</option>
                 </select>
               </div>
-              {/*  <div className="mb-4">
-            <label className="block text-gray-700 text-sm">Image</label>
-            <input
-              type="text"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="input input-bordered w-full input-xs"
-            />
-          </div> */}
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm">Status</label>
                 <input
@@ -237,7 +263,6 @@ const UnserializedModal = ({
                   <p className="text-red-500 text-sm">{errors.inDate}</p>
                 )}
               </div>
-
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm">Supplier</label>
                 <input
@@ -248,10 +273,77 @@ const UnserializedModal = ({
                   className="input input-bordered w-full input-xs"
                   required
                 />
-                {errors.supplier && (
-                  <p className="text-red-500 text-sm">{errors.supplier}</p>
+                {errors.inDate && (
+                  <p className="text-red-500 text-sm">{errors.inDate}</p>
                 )}
               </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Currency</label>
+                <select
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleChange}
+                  className="select select-bordered w-full select-xs"
+                >
+                  <option value="USD">USD</option>
+                  <option value="MYR">MYR</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Unit Price</label>
+                <input
+                  type="number"
+                  name="unitPrice"
+                  step="0.01"
+                  value={formData.unitPrice}
+                  onChange={handleChange}
+                  className="input input-bordered w-full input-xs"
+                  required
+                />
+                {errors.unitPrice && (
+                  <p className="text-red-500 text-sm">{errors.unitPrice}</p>
+                )}
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Total Price</label>
+                <input
+                  type="number"
+                  value={totalPrice}
+                  className="input input-bordered w-full input-xs"
+                  disabled
+                />
+              </div>
+              {formData.currency === "MYR" && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm">Conversion Rate</label>
+                    <input
+                      type="number"
+                      value={conversionRate}
+                      className="input input-bordered w-full input-xs"
+                      disabled
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm">Converted Unit Price</label>
+                    <input
+                      type="number"
+                      value={convertedUnitPrice}
+                      className="input input-bordered w-full input-xs"
+                      disabled
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm">Converted Total Price</label>
+                    <input
+                      type="number"
+                      value={convertedTotalPrice}
+                      className="input input-bordered w-full input-xs"
+                      disabled
+                    />
+                  </div>
+                </>
+              )}
               {existMessage && (
                 <div role="alert" className="alert mb-2">
                   <svg
@@ -284,6 +376,7 @@ const UnserializedModal = ({
                 <button
                   type="submit"
                   className="btn btn-primary btn-sm text-white"
+                  
                 >
                   Save
                 </button>

@@ -14,7 +14,8 @@ const ConfirmationModal = ({ poData, bulkItem, userEmail, closeModal }) => {
   const parseBulkItem = (item) => ({
     ...item,
     inventoryId: Number(item.inventoryId),
-    outDate: item.outDate === "" ? null : item.outDate
+    outDate: item.outDate === "" ? null : item.outDate,
+    quantityChange : Number(item.quantityChange)
   });
 
   const parsedBulkItem = {

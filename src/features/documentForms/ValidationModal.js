@@ -11,6 +11,9 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
     if (isOpen) {
       const errors = [];
       combinedData.forEach((item) => {
+        if (item.key === "notes" || item.key === "vendorAddressLine3" || item.key === "vendorAddressLine4") {
+          return;
+        }
         if (item.key === "items" && (!item.value || item.value.length === 0)) {
           errors.push("Please add items.");
         } else if (!item.value || item.value === "") {
@@ -49,6 +52,7 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
       condition2: "",
       condition3: "",
       items: [],
+      additionalItems: [],
       poNumber: "",
       poDate: "",
       vendorAddressLine1: "",
@@ -58,8 +62,9 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
       vendorTel: "",
       vendorEmail: "",
       vendorAttn: "",
+      moc: "", 
     };
-
+  
     combinedData.forEach((item) => {
       switch (item.key) {
         case "shipToAddressLine1":
@@ -92,6 +97,7 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
         case "vendorTel":
         case "vendorEmail":
         case "vendorAttn":
+        case "moc":
           formattedData[item.key] = item.value;
           break;
         case "items":
@@ -99,12 +105,16 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
             JSON.parse(jsonString)
           );
           break;
-
+        case "additionalItems":
+          formattedData.additionalItems = item.value.map((jsonString) =>
+            JSON.parse(jsonString)
+          );
+          break;
         default:
           break;
       }
     });
-
+  
     return formattedData;
   };
 

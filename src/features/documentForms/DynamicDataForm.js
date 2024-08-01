@@ -29,18 +29,11 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
     uom: "",
     unitPrice: "",
     amount: "",
-    type: "Non-Serialized",
+    type: "",
     id : ""
   });
 
-  const [additionalData, setadditionalData] = useState({
-    partNumber: "",
-    partDescription: "",
-    quantity: "",
-    uom: "",
-    unitPrice: "",
-    amount: "",
-  });
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,9 +45,28 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
     setItem({ ...item, [name]: value });
   };
 
-  const handleAdditionalItemChange = (e) => {
-    const { name, value } = e.target;
-    setadditionalData({ ...item, [name]: value });
+  const handleAdditionalItem = () => {
+    calculateAmount();
+    const updatedItems = [...dynamicData.items, item];
+    setDynamicData({ ...dynamicData, items: [...dynamicData.items, item] });
+
+    const newTotalAmount = updatedItems.reduce((sum, currentItem) => {
+      return sum + parseFloat(currentItem.amount);
+    }, 0);
+
+    setTotalAmount(newTotalAmount);
+
+    setItem({
+      partNo: "",
+      description: "",
+      quantity: "",
+      uom: "",
+      unitPrice: "",
+      amount: "",
+      type: "Additional",
+    });
+    setValidated(false);
+    closeModal();
   };
 
   const handlePOGenerate = (e) => {
@@ -80,11 +92,13 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
       uom: "",
       unitPrice: "",
       amount: "",
-      type: "Non-Serialized",
+      type: "",
     });
     setValidated(false);
     closeModal();
   };
+
+  
 
   const validateItem = async () => {
     try {
@@ -202,7 +216,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
       uom: "",
       unitPrice: "",
       amount: "",
-      type: "Non-Serialized",
+      type: "",
       id : "",
     });
   };
@@ -215,7 +229,23 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
     <div className="form-container bg-white p-4 rounded-md">
       <h2 className="text-xl mb-4">Dynamic Data</h2>
       <form>
-        {/* Overview Section */}
+      <div role="alert" className="alert shadow-lg mb-4">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="stroke-info h-6 w-6 shrink-0">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>
+  <div>
+    <h3 className="font-bold">Fill PO data in this form</h3>
+    <div className="text-xs">Note: Input(s) marked as (?) are optional, you can leave those input fields empty.</div>
+  </div>
+</div>
         <div className="mb-4">
           <h3 className="text-lg  mb-2">Overview</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -234,13 +264,13 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
 
             <div>
               <label className="block text-gray-700 text-sm  mb-2">
-                Date:
+                PO Date:
               </label>
               <input
-                name="date"
+                name="poDate"
                 type="date"
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                value={dynamicData.date}
+                value={dynamicData.poDate}
                 onChange={handleChange}
               />
             </div>
@@ -295,7 +325,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
             </div>
             <div>
               <label className="block text-gray-700 text-sm  mb-2">
-                Vendor Address Line 3
+                Vendor Address Line 3 (?)
               </label>
               <input
                 name="vendorAddressLine3"
@@ -307,7 +337,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
             </div>
             <div>
               <label className="block text-gray-700 text-sm  mb-2">
-                Vendor Address Line 4
+                Vendor Address Line 4 (?)
               </label>
               <input
                 name="vendorAddressLine4"
@@ -353,6 +383,15 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                 onChange={handleChange}
               />
             </div>
+            <div>
+              <label className="block text-gray-700 text-sm  mb-2">
+                Mode of currency
+              </label>
+              <select className="select select-bordered w-full max-w-xs" onChange={handleChange} value={dynamicData.moc} name="moc">
+                <option value={'USD'}>USD</option>
+                <option value={'MYR'}>MYR</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -375,7 +414,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
       </form>
 
       <div className="mt-4">
-        <h3 className="text-2xl mb-2 ">Items List</h3>
+        <h3 className="text-2xl mb-2 ">PO Items List Preview</h3>
         <div className="overflow-x-auto">
           <table className="table">
             <thead className="bg-gray-50">
@@ -540,19 +579,19 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               <>
                 {message && (
                   <div role="alert" className="alert">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    className="stroke-info h-6 w-6 shrink-0">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-  </svg>
-  <span>{message}</span>
-</div>                )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      className="stroke-info h-6 w-6 shrink-0">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>{message}</span>
+                  </div>                )}
 
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm  mb-2">
@@ -659,112 +698,95 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
               </div>
             </div>
           </div>
-          <form>
-            <div className="mb-4">
-              <label
-                htmlFor="partNumber"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Part Number
-              </label>
-              <input
-                type="text"
-                name="partNumberAdditional"
-                id="partNumberAdditional"
-                value={additionalData.partNumberAdditional}
-                onChange={handleAdditionalItemChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="partDescription"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Part Description
-              </label>
-              <input
-                type="text"
-                name="partDescriptionAdditional"
-                id="partDescriptionAdditional"
-                value={additionalData.partDescriptionAdditional}
-                onChange={handleAdditionalItemChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="partDescription"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Quantity
-              </label>
-              <input
-                type="text"
-                name="quantityAdditional"
-                id="quantityAdditional"
-                value={additionalData.quantityAdditional}
-                onChange={handleAdditionalItemChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="uom"
-                className="block text-sm font-medium text-gray-700"
-              >
-                UOM
-              </label>
-              <input
-                type="text"
-                name="uomAdditional"
-                id="uomAdditional"
-                value={additionalData.uomAdditional}
-                onChange={handleAdditionalItemChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="unitPrice"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Unit Price
-              </label>
-              <input
-                type="number"
-                name="unitPriceAdditional"
-                id="unitPriceAdditional"
-                value={additionalData.unitPriceAdditional}
-                onChange={handleAdditionalItemChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="amount"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Amount
-              </label>
-              <input
-                type="number"
-                name="amountAdditional"
-                id="amountAdditional"
-                value={additionalData.amountAdditional}
-                onChange={handleAdditionalItemChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
+          <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    Part Number:
+                  </label>
+                  <input
+                    name="partNo"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.partNo}
+                    onChange={handleItemChange}
+                  />
+                </div>  <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    Part Desc:
+                  </label>
+                  <input
+                    name="description"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.description}
+                    onChange={handleItemChange}
+                  />
+                </div>  <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    UOM:
+                  </label>
+                  <input
+                    name="uom"
+                    type="text"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.uom}
+                    onChange={handleItemChange}
+                  />
+                </div>
+           
+           
+                <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    Quantity:
+                  </label>
+                  <input
+                    name="quantity"
+                    type="number"
+                    min="1"
+                    step="1"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.quantity}
+                    onChange={handleItemChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    Unit Price:
+                  </label>
+                  <input
+                    name="unitPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.unitPrice}
+                    onChange={handleItemChange}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                    Amount
+                  </label>
+                  <input
+                    name="amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={item.amount}
+                    onChange={handleItemChange}
+
+                  />
+                </div>
             <div className="flex justify-end">
-              <button type="submit" className="btn btn-sm btn-primary">
-                Add Part
-              </button>
+            <button
+                  type="button"
+                  onClick={handleAdditionalItem}
+                  className="btn btn-sm mt-4"
+                >
+                  Add Item
+                </button>
             </div>
-          </form>
+          
         </EmptyModalTemplate>
       )}
     

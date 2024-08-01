@@ -4,7 +4,7 @@ import { setPageTitle } from "../../features/common/headerSlice";
 import Table from "./components/Table";
 import ActionButton from "./components/ActionButton";
 import Alert from "./components/Alert";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; 
 
 function InternalPage() {
   const dispatch = useDispatch();
@@ -14,6 +14,7 @@ function InternalPage() {
   const [userEmail, setUserEmail] = useState("");
   const [updateCounter, setUpdateCounter] = useState(0);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [myrToUsdRate, setMyrToUsdRate] = useState(null);
 
   useEffect(() => {
     dispatch(setPageTitle({ title: "Inventory" }));
@@ -28,7 +29,33 @@ function InternalPage() {
         console.error("Invalid token:", error);
       }
     }
+
+    const fetchExchangeRate = async () => {
+      try {
+        const response = await fetch(
+          "https://v6.exchangerate-api.com/v6/5cfc49340ef0b1550952197e/latest/USD"
+        );
+        const data = await response.json();
+        if (data.result === "success") {
+          setMyrToUsdRate(data.conversion_rates.MYR);
+        } else {
+          console.error("Failed to fetch exchange rate:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    };
+
+    fetchExchangeRate();
   }, [dispatch]);
+
+  // Example conversion function
+  const convertMyrToUsd = (amountInMyr) => {
+    if (myrToUsdRate) {
+      return amountInMyr / myrToUsdRate;
+    }
+    return null;
+  };
 
   return (
     <div className="h-4/5 bg-base-200">
@@ -45,6 +72,7 @@ function InternalPage() {
         setUpdateCounter={setUpdateCounter}
         showUpdateModal={showUpdateModal}
         setShowUpdateModal={setShowUpdateModal}
+        conversionRate = {myrToUsdRate}
       />
       <Table
         result={result}
@@ -57,7 +85,9 @@ function InternalPage() {
         setUpdateCounter={setUpdateCounter}
         showUpdateModal={showUpdateModal}
         setShowUpdateModal={setShowUpdateModal}
+        conversionRate = {myrToUsdRate}
       />
+     
     </div>
   );
 }

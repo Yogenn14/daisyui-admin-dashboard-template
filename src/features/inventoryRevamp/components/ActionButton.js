@@ -15,6 +15,7 @@ const ActionButton = ({
   setUpdateCounter,
   showUpdateModal,
   setShowUpdateModal,
+  conversionRate
 }) => {
   const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
@@ -136,16 +137,16 @@ const ActionButton = ({
         </div>
         <ul
           tabIndex={0}
-          className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+          className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64"
         >
           <li>
             <a onClick={openPOmodal}>Generate/Add Via PO</a>
           </li>
           <li>
-            <a onClick={openModal}>Add New Part[Serialized]</a>
+            <a onClick={openModal}>Add New Part [Serialized]</a>
           </li>
           <li>
-            <a onClick={openUnserializedModal}>Add Non Serialized Item</a>
+            <a onClick={openUnserializedModal}>Add New Part [Non-Serialized]</a>
           </li>
         </ul>
       </div>
@@ -196,6 +197,7 @@ const ActionButton = ({
           userEmail={userEmail}
           updateCounter={updateCounter}
           setUpdateCounter={setUpdateCounter}
+          
         />
       )}
       {showUnseriliazedModal && (
@@ -206,6 +208,7 @@ const ActionButton = ({
           setUpdateCounter={setUpdateCounter}
           showUpdateModal={showUpdateModal}
           setShowUpdateModal={setShowUpdateModal}
+          conversionRate = {conversionRate}
         />
       )}
     </div>

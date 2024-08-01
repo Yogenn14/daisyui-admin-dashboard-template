@@ -61,6 +61,18 @@ function Row(props) {
     setunserializedModal(true);
   };
 
+    const formatToMalaysianTime = (utcTime) => {
+    const date = new Date(utcTime);
+    const options = {
+      timeZone: "Asia/Kuala_Lumpur",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+     
+    };
+    return date.toLocaleString("en-US", options);
+  };
+
   const cellBorderStyle = {
     borderRight: "1px solid rgba(224, 224, 224, 1)",
     borderTop: "1px solid rgba(224, 224, 224, 1)",
@@ -96,7 +108,7 @@ function Row(props) {
             {row.quantity}
           </TableCell>
           <TableCell align="right" sx={cellBorderStyle}>
-            {row.inDate}
+            {(row.inDate)}
           </TableCell>
           <TableCell align="right" sx={cellBorderStyle}>
             {row.outDate === null ? "-" : row.outDate}
@@ -157,7 +169,13 @@ function Row(props) {
                             Manufacturer/OEM
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
+                            Unit Price
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
                             In Date
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Warranty End Date
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Out Date
@@ -206,10 +224,16 @@ function Row(props) {
                               {serialRow.manufacturer}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.inDate}
+                              {serialRow.unitPrice}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.outDate}
+                              {formatToMalaysianTime(serialRow.inDate)}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.warrantyEndDate ? formatToMalaysianTime(serialRow.warrantyEndDate) : "N/A"}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.outDate ? formatToMalaysianTime(serialRow.outDate) : "N/A"}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
                               {serialRow.supplier}
@@ -310,8 +334,15 @@ function Row(props) {
                             Total Added
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
+                            Unit Price
+                          </TableCell> 
+                           <TableCell align="right" sx={cellBorderStyle}>
+                            Total Price
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
                             Supplier
                           </TableCell>
+                          
                           <TableCell align="right" sx={cellBorderStyle}>
                             User Email
                           </TableCell>
@@ -356,6 +387,12 @@ function Row(props) {
                               </TableCell>
                               <TableCell align="right" sx={cellBorderStyle}>
                                 <p>{unserialRow.totalPurchased}</p>
+                              </TableCell>
+                              <TableCell align="right" sx={cellBorderStyle}>
+                                <p>{unserialRow.unitPrice}</p>
+                              </TableCell>
+                              <TableCell align="right" sx={cellBorderStyle}>
+                                <p>{unserialRow.totalPrice}</p>
                               </TableCell>
                               <TableCell align="right" sx={cellBorderStyle}>
                                 {unserialRow.supplier}
@@ -403,6 +440,30 @@ function Row(props) {
                                           >
                                             Date
                                           </TableCell>
+                                          <TableCell
+                                            align="right"
+                                            sx={cellBorderStyle}
+                                          >
+                                            Selling Price Per Unit
+                                          </TableCell>
+                                          <TableCell
+                                            align="right"
+                                            sx={cellBorderStyle}
+                                          >
+                                            Profit Per Unit
+                                          </TableCell>
+                                          <TableCell
+                                            align="right"
+                                            sx={cellBorderStyle}
+                                          >
+                                            Total Profit
+                                          </TableCell>
+                                          <TableCell
+                                            align="right"
+                                            sx={cellBorderStyle}
+                                          >
+                                            User Email
+                                          </TableCell>
                                         </TableRow>
                                       </TableHead>
                                       <TableBody>
@@ -423,6 +484,31 @@ function Row(props) {
                                                 sx={cellBorderStyle}
                                               >
                                                 {outItem.date}
+                                              </TableCell>
+                                            
+                                              <TableCell
+                                                align="right"
+                                                sx={cellBorderStyle}
+                                              >
+                                                {outItem.sellingPricePerUnit}
+                                              </TableCell>
+                                              <TableCell
+                                                align="right"
+                                                sx={cellBorderStyle}
+                                              >
+                                                {outItem.profitPerUnit}
+                                              </TableCell>
+                                              <TableCell
+                                                align="right"
+                                                sx={cellBorderStyle}
+                                              >
+                                                {outItem.totalProfit}
+                                              </TableCell>
+                                              <TableCell
+                                                align="right"
+                                                sx={cellBorderStyle}
+                                              >
+                                                {outItem.userEmail}
                                               </TableCell>
                                             </TableRow>
                                           )
@@ -472,6 +558,7 @@ function Row(props) {
             userEmail={props.userEmail}
             updateCounter={props.updateCounter}
             setUpdateCounter={props.setUpdateCounter}
+            conversionRate = {[props.conversionRate]}
           />
         )}
       </React.Fragment>
@@ -549,6 +636,7 @@ function SemiconductorTable({
   setUpdateCounter,
   showUpdateModal,
   setShowUpdateModal,
+  conversionRate
 }) {
   const [rows, setRows] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -598,6 +686,8 @@ function SemiconductorTable({
                 supplier: serial.supplier,
                 userEmail: serial.userEmail,
                 customer: serial.customer,
+                warrantyEndDate: serial.warrantyEndDate,
+                unitPrice : serial.unitPrice
               })),
               []
             );
@@ -622,12 +712,18 @@ function SemiconductorTable({
                 userEmail: nonserial.userEmail,
                 quantity: nonserial.quantityChange,
                 totalPurchased: nonserial.totalPurchased,
+                unitPrice: nonserial.unitPrice,
+                totalPrice: nonserial.totalPrice,
+
                 unserializedOut: nonserial.unserializedOut.map((outItem) => ({
                   id: outItem.id,
                   unserializedInId: outItem.unserializedInId,
                   customer: outItem.customer,
                   quantity: outItem.quantity,
                   date: outItem.date,
+                  sellingPricePerUnit : outItem.shipOutPrice,
+                  profitPerUnit: outItem.profitPerUnit,
+                  totalProfit: outItem.totalProfit,
                   userEmail: outItem.userEmail,
                 })),
               }))
@@ -656,6 +752,8 @@ function SemiconductorTable({
   };
 
   const cellBorderStyle = { borderRight: "1px solid rgba(224, 224, 224, 1)" };
+
+
 
   return (
     <>
@@ -704,6 +802,7 @@ function SemiconductorTable({
                   setUpdateCounter={setUpdateCounter}
                   setShowUpdateModal={setShowUpdateModal}
                   showUpdateModal={showUpdateModal}
+                  conversionRate = {conversionRate}
                 />
               </React.Fragment>
             ))}

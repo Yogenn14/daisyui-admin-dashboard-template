@@ -26,10 +26,12 @@ function InternalPage() {
     supervisorEmail: "",
     supervisorTel: "",
     notes: "",
+    authorEmail : "",
+    updatedBy : "",
   });
   const [dynamicData, setDynamicData] = useState({
     poNumber: "",
-    date: "",
+    poDate: "",
     quotationNumber: "",
     vendorAddressLine1: "",
     vendorAddressLine2: "",
@@ -37,6 +39,7 @@ function InternalPage() {
     vendorAddressLine4: "",
     items: [],
     additionalData: [],
+    moc : "USD"
   });
   const [activeTab, setActiveTab] = useState("PO");
   const [isValidationModalOpen, setValidationModalOpen] = useState(false);
@@ -103,6 +106,8 @@ function InternalPage() {
         condition1: poData.condition1,
         condition2: poData.condition2,
         condition3: poData.condition3,
+        updatedAt : poData.updatedAt,
+        authorEmail : poData.authorEmail
       });
     } catch (error) {
       console.error("Error fetching PO data:", error);
@@ -160,7 +165,7 @@ function InternalPage() {
           <div className="text-center mt-4 lg:col-span-2">
             <button
               onClick={handleGeneratePO}
-              className={`btn btn-md w-full ${
+              className={`btn btn-md w-full btn-primary ${
                 isItemsArrayEmpty() ? "btn-disabled" : ""
               }`}
             >

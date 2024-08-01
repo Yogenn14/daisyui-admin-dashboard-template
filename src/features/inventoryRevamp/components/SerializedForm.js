@@ -17,10 +17,12 @@ const SerializedForm = ({
   const [condition, setCondition] = useState("new");
   const [status, setStatus] = useState("");
   const [manufactureroem, setManufactureroem] = useState("");
+  const [unitPrice,setUnitPrice] = useState()
   const [inDate, setInDate] = useState("");
   const [outDate, setOutDate] = useState(null);
   const [supplier, setSupplier] = useState("");
   const [customer, setCustomer] = useState("");
+  const [warrantyEndDate,setwarrantyEndDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
@@ -35,11 +37,13 @@ const SerializedForm = ({
       condition,
       status,
       manufactureroem,
+      unitPrice,
       inDate,
       outDate,
       userEmail,
       supplier,
       customer,
+      warrantyEndDate,
     };
 
     try {
@@ -151,12 +155,43 @@ const SerializedForm = ({
               </div>
               <div className="mb-4">
                 <label className="input input-bordered flex items-center gap-2">
+                <input
+                  type="number"
+                   step="0.01"
+                  className="grow"
+                  placeholder="Unit Price"
+                  value={unitPrice}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Convert to float and handle NaN
+                    setUnitPrice(value === "" ? "" : parseFloat(value));
+                  }}
+                  required
+                />
+
+                </label>
+              </div>
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2">
                   In Date
                   <input
                     type="date"
                     className="grow"
                     value={inDate}
                     onChange={(e) => setInDate(e.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2">
+                  Warranty End Date
+                  <input
+                    type="date"
+                    className="grow"
+                    value={warrantyEndDate}
+                    onChange={(e) => setwarrantyEndDate(e.target.value)}
                     required
                   />
                 </label>
