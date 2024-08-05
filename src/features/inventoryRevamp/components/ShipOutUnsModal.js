@@ -1,10 +1,15 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../../common/headerSlice";
 
 const ShipOutUnsModal = ({
   open,
   setshipOutUnsModal,
   selectedUnsInvId,
   outunsID,
+  userEmail,
+  updateCounter,
+  setUpdateCounter
 }) => {
   const handleClose = () => {
     setshipOutUnsModal(false);
@@ -13,6 +18,8 @@ const ShipOutUnsModal = ({
   const [shipments, setShipments] = useState([{ customer: "", quantity: 0 }]);
   const [date, setDate] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const dispatch = useDispatch();
+
 
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
@@ -36,8 +43,10 @@ const ShipOutUnsModal = ({
       shipments: shipments.map((shipment) => ({
         unserializedInId: outunsID,
         quantity: parseInt(shipment.quantity),
+        perUnitSellingPrice : shipment.perUnitSellingPrice,
         customer: shipment.customer,
         date: date,
+        userEmail:userEmail
       })),
     };
     console.log("Payload to be sent:", JSON.stringify(payload));
@@ -61,11 +70,21 @@ const ShipOutUnsModal = ({
       }
 
       const data = await response.json();
-      console.log("Successfully shipped out:", data);
-      setshipOutUnsModal(false);
+       dispatch(
+            showNotification({
+              message: "Successfully shiped out item",
+              status: 1,
+            })
+          );   
+        setshipOutUnsModal(false);
+        setUpdateCounter(updateCounter + 1)
     } catch (error) {
-      console.error("Error shipping out:", error);
-      setErrorMessage(error.message);
+      dispatch(
+        showNotification({
+          message: "Error shipping out",
+          status: 0,
+        })
+      );      setErrorMessage(error.message);
     }
   };
 
@@ -109,7 +128,7 @@ const ShipOutUnsModal = ({
                     {shipments.map((shipment, index) => (
                       <div
                         key={index}
-                        className="flex items-center space-x-2 mb-2"
+                        className="items-center space-x-2 mb-2 bg-gray-100 p-2 rounded-lg"
                       >
                         <input
                           type="text"
@@ -117,7 +136,7 @@ const ShipOutUnsModal = ({
                           placeholder="Customer name"
                           value={shipment.customer}
                           onChange={(e) => handleInputChange(index, e)}
-                          className="border border-gray-300 rounded-md px-3 py-2 w-1/2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          className="border border-gray-300 ml-2 rounded-md px-3 py-2 w-1/2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                         />
                         <input
                           type="number"
@@ -127,6 +146,16 @@ const ShipOutUnsModal = ({
                           onChange={(e) => handleInputChange(index, e)}
                           className="border border-gray-300 rounded-md px-3 py-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                         />
+                        <div className="mt-2 w-full space-x-4">
+                          <input
+                          type="number"
+                          name="perUnitSellingPrice"
+                          placeholder="Per Unit Selling Price(USD)"
+                          value={shipment.perUnitSellingPrice}
+                          onChange={(e) => handleInputChange(index, e)}
+                          className="border border-gray-300 rounded-md px-3 py-2  w-3/4 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                    
                         <button
                           type="button"
                           onClick={() => handleRemoveCustomer(index)}
@@ -146,6 +175,7 @@ const ShipOutUnsModal = ({
                             />
                           </svg>
                         </button>
+                      </div>
                       </div>
                     ))}
                     <button

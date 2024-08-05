@@ -1,6 +1,10 @@
 import React from "react";
 
-const EmptyModalTemplate = () => {
+const EmptyModalTemplate = (
+  updateCounter,
+  setUpdateCounter,
+
+) => {
   return (
     <div
       class="relative z-10"

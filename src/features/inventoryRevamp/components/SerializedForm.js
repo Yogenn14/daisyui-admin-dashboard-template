@@ -42,10 +42,10 @@ const SerializedForm = ({
       outDate,
       userEmail,
       supplier,
-      customer,
+      customer,   
       warrantyEndDate,
     };
-
+    console.log(newItem)
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_NODE_API_SERVER}inventory/addSerializedItem/${id}`,
