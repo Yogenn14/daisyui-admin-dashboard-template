@@ -7,6 +7,7 @@ const SerializedModal = ({
   openSerializedForm,
   updateCounter,
   setUpdateCounter,
+  conversionRate
 }) => {
   const [partNumber, setPartNumber] = useState("");
   const [partDescription, setPartDescription] = useState("");
@@ -188,6 +189,7 @@ const SerializedModal = ({
                         closeModal={closeModal}
                         updateCounter={updateCounter}
                         setUpdateCounter={setUpdateCounter}
+                        conversionRate = {conversionRate}
                       />
                     )}
                   </div>

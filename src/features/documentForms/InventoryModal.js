@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 
-const InventoryModal = ({ closeModal, poData, userEmail }) => {
+const InventoryModal = ({ closeModal, poData, userEmail,moc, conversionRate }) => {
   const initializeFormData = () => {
     return poData.items.map((item) => ({
       ...item,
@@ -72,6 +72,9 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
             supplier: item.suppliers[index],
             customer: "",
             warrantyEndDate: item.warrantyEndDates[index],
+            unitPrice: moc === "MYR" ? item.unitPrice/conversionRate : item.unitPrice,
+            currency: moc,
+            conversionRate :moc === "MYR" ? conversionRate : 0
           }));
         } else {
           return {
@@ -83,9 +86,11 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
             manufactureroem: item.manufactureroem,
             condition: item.condition,
             status: item.status,
-            unitPrice: item.unitPrice,
-            totalPrice:item.amount,
+            unitPrice: moc === "MYR" ? item.unitPrice/conversionRate : item.unitPrice,
+            totalPrice: moc === "MYR" ? item.quantity*item.unitPrice/conversionRate : item.quantity*item.unitPrice,
             userEmail,
+            conversionRate :moc === "MYR" ? conversionRate : 0,
+            currency: moc
           };
         }
       }),
@@ -101,7 +106,7 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
       });
       console.log(JSON.stringify(requestBody));
       console.log(poData);
-  
+      console.log(conversionRate)
       if (!response.ok) {
         const data = await response.json();
         const errorMessage = data.error;
@@ -131,6 +136,7 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
   }
 
   return (
+    
     <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -140,6 +146,7 @@ const InventoryModal = ({ closeModal, poData, userEmail }) => {
               <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
                   <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                    
                     <div className="badge badge-ghost mr-2">STEP 2</div>
                     Inventory Items <div className="badge badge-outline">Assigned by: {userEmail}</div>
                   </h3>

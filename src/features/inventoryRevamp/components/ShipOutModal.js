@@ -13,6 +13,7 @@ const ShipOutModal = ({
 }) => {
   const [customer, setCustomer] = useState("");
   const [outDate, setOutDate] = useState("");
+  const [sellingPrice,setSellingPrice] = useState(0)
   const [error, setError] = useState("");
   const dispatch = useDispatch();
 
@@ -21,6 +22,7 @@ const ShipOutModal = ({
       serialNumbers,
       outDate,
       customer,
+      sellingPrice,
       userEmail,
     };
 
@@ -98,9 +100,20 @@ const ShipOutModal = ({
                   <p className="ml-4 mb-2">Out Date</p>
                   <input
                     type="date"
-                    className="grow input"
+                    className="input input-bordered"
                     value={outDate}
                     onChange={(e) => setOutDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mt-4 ml-6 gap-2 w-3/4">
+                  <p className="ml-4 mb-2">Selling Price</p>
+                  <input
+                    type="number"
+                    step={'0.01'}
+                    className="grow input input-bordered"
+                    value={sellingPrice}
+                    onChange={(e) => setSellingPrice(e.target.value)}
                     required
                   />
                 </div>

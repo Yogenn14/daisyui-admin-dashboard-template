@@ -41,8 +41,8 @@ const UnserializedModal = ({
   useEffect(() => {
     setTotalPrice(formData.unitPrice * formData.quantity);
     if (formData.currency === "MYR") {
-      setConvertedUnitPrice(formData.unitPrice * conversionRate);
-      setConvertedTotalPrice(formData.unitPrice * formData.quantity * conversionRate);
+      setConvertedUnitPrice(formData.unitPrice / conversionRate);
+      setConvertedTotalPrice(formData.unitPrice * formData.quantity / conversionRate);
     } else {
       setConvertedUnitPrice(0);
       setConvertedTotalPrice(0);

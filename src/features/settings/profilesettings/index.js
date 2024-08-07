@@ -13,6 +13,9 @@ function ProfileSettings() {
   const [userData, setuserData] = useState();
   const [name, setName] = useState();
   const [email, setEmail] = useState();
+  const [twitter, setTwitter] = useState();
+  const [facebook, setFacebook] = useState();
+  const [linkedIn, setlinkedIn] = useState();
   const [role, setRole] = useState();
   const [avatar, setAvatar] = useState();
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -28,6 +31,9 @@ function ProfileSettings() {
         setEmail(result.user?.email);
         setRole(result.user?.role);
         setAvatar(result.user?.image);
+        setlinkedIn(result.user?.linkedIn);
+        setFacebook(result.user?.facebook);
+        setTwitter(result.twitter?.twitter);
       } catch (error) {
         console.error("user data cannot be fetched");
       }
@@ -48,7 +54,7 @@ function ProfileSettings() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name, email }),
+          body: JSON.stringify({ name, email, twitter, facebook, linkedIn }),
         }
       );
       if (response.ok) {
@@ -220,6 +226,43 @@ function ProfileSettings() {
             />
           </label>
 
+          <label className="form-control w-full max-w-full">
+            <div className="label">
+              <span className="label-text">Facebook</span>
+            </div>
+            <input
+              type="text"
+              value={facebook}
+              onChange={(e) => setFacebook(e.target.value)}
+              className="input input-bordered w-full max-w-full"
+            />
+          </label>
+
+
+          <label className="form-control w-full max-w-full">
+            <div className="label">
+              <span className="label-text">Twitter</span>
+            </div>
+            <input
+              type="text"
+              value={twitter}
+              onChange={(e) => setTwitter(e.target.value)}
+              className="input input-bordered w-full max-w-full"
+            />
+          </label>
+
+
+              <label className="form-control w-full max-w-full">
+            <div className="label">
+              <span className="label-text">Linked In</span>
+            </div>
+            <input
+              type="text"
+              value={linkedIn}
+              onChange={(e) => setlinkedIn(e.target.value)}
+              className="input input-bordered w-full max-w-full"
+            />
+          </label>
           <button
             className="btn btn-primary float-right w-1/2 mt-8"
             onClick={() => updateProfileDetails()}

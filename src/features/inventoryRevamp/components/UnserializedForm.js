@@ -35,8 +35,8 @@ const UnserializedForm = ({
     setTotalPrice(price);
 
     if (formData.currency === "MYR") {
-      setConvertedUnitPrice(formData.unitPrice * conversionRate);
-      setConvertedTotalPrice(price * conversionRate);
+      setConvertedUnitPrice(formData.unitPrice / conversionRate);
+      setConvertedTotalPrice(price /conversionRate);
     } else {
       setConvertedUnitPrice(0);
       setConvertedTotalPrice(0);
