@@ -11,18 +11,20 @@ const SerializedForm = ({
   closeModal,
   updateCounter,
   setUpdateCounter,
+  conversionRate,
 }) => {
   const [serialNumber, setSerialNumber] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [condition, setCondition] = useState("new");
   const [status, setStatus] = useState("");
   const [manufactureroem, setManufactureroem] = useState("");
-  const [unitPrice,setUnitPrice] = useState()
+  const [unitPrice, setUnitPrice] = useState("");
   const [inDate, setInDate] = useState("");
   const [outDate, setOutDate] = useState(null);
   const [supplier, setSupplier] = useState("");
   const [customer, setCustomer] = useState("");
-  const [warrantyEndDate,setwarrantyEndDate] = useState("");
+  const [warrantyEndDate, setWarrantyEndDate] = useState("");
+  const [currency, setCurrency] = useState("USD");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
@@ -37,15 +39,17 @@ const SerializedForm = ({
       condition,
       status,
       manufactureroem,
-      unitPrice,
+      unitPrice: currency === "MYR" ? unitPrice/conversionRate : unitPrice,
       inDate,
       outDate,
+      currency,
+      conversionRate: currency === "MYR" ? conversionRate : 0,
       userEmail,
       supplier,
-      customer,   
+      customer,
       warrantyEndDate,
     };
-    console.log(newItem)
+    console.log(newItem);
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_NODE_API_SERVER}inventory/addSerializedItem/${id}`,
@@ -85,6 +89,8 @@ const SerializedForm = ({
       aria-modal="true"
     >
       <div>//Inv ID: {inventoryId}</div>
+      <div>Rate: {conversionRate}</div>
+
       <div className="sm:flex sm:items-start">
         <div className="mt-3  sm:mt-4 sm:text-left">
           <h3
@@ -129,6 +135,38 @@ const SerializedForm = ({
                   </select>
                 </label>
               </div>
+
+              <div className="mb-4">
+                <label className="flex items-center gap-2">
+                  Currency
+                  <select
+                    className="grow select select-bordered"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    required
+                  >
+                    <option value="USD">USD</option>
+                    <option value="MYR">MYR</option>
+                  </select>
+                </label>
+              </div>
+
+              {currency === "MYR" && (
+                <>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2">
+                      Converted Unit Price
+                      <input
+                        type="text"
+                        className="grow"
+                        value={(unitPrice / conversionRate).toFixed(2)}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
+
               <div className="mb-4">
                 <label className="input input-bordered flex items-center gap-2">
                   <input
@@ -155,20 +193,18 @@ const SerializedForm = ({
               </div>
               <div className="mb-4">
                 <label className="input input-bordered flex items-center gap-2">
-                <input
-                  type="number"
-                   step="0.01"
-                  className="grow"
-                  placeholder="Unit Price"
-                  value={unitPrice}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Convert to float and handle NaN
-                    setUnitPrice(value === "" ? "" : parseFloat(value));
-                  }}
-                  required
-                />
-
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="grow"
+                    placeholder="Unit Price"
+                    value={unitPrice}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setUnitPrice(value === "" ? "" : parseFloat(value));
+                    }}
+                    required
+                  />
                 </label>
               </div>
               <div className="mb-4">
@@ -191,7 +227,7 @@ const SerializedForm = ({
                     type="date"
                     className="grow"
                     value={warrantyEndDate}
-                    onChange={(e) => setwarrantyEndDate(e.target.value)}
+                    onChange={(e) => setWarrantyEndDate(e.target.value)}
                     required
                   />
                 </label>

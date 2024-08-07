@@ -32,7 +32,7 @@ const routes = [
   {
     path: "/app/leads", // url
     icon: <InboxArrowDownIcon className={iconClasses} />, // icon component
-    name: "Leads", // name that appear in Sidebar
+    name: "Staffs/Users", // name that appear in Sidebar
   },
   {
     path: "/app/transactions", // url
@@ -50,7 +50,7 @@ const routes = [
     icon: <InboxStackIcon className={iconClasses} />,
     name: "Document Form",
   },
-  {
+ /*  {
     path: "/app/charts", // url
     icon: <ChartBarIcon className={iconClasses} />, // icon component
     name: "Analytics", // name that appear in Sidebar
@@ -59,13 +59,13 @@ const routes = [
     path: "/app/integration", // url
     icon: <BoltIcon className={iconClasses} />, // icon component
     name: "Integration", // name that appear in Sidebar
-  },
-  {
+  }, */
+/*   {
     path: "/app/calendar", // url
     icon: <CalendarDaysIcon className={iconClasses} />, // icon component
     name: "Calendar", // name that appear in Sidebar
-  },
-  {
+  }, */
+ /*  {
     path: "/app/salesprogress", // url
     icon: <ChartBarIcon className={iconClasses} />, // icon component
     name: "Sales Progress", // name that appear in Sidebar
@@ -74,9 +74,14 @@ const routes = [
     path: "/app/documentmanager",
     icon: <InboxArrowDownIcon className={iconClasses} />,
     name: "Document Manager",
+  }, */
+  {
+    path: "/app/settings-profile", //url
+    icon: <UserIcon className={submenuIconClasses} />, // icon component
+    name: "Profile", // name that appear in Sidebar
   },
 
-  {
+ /*  {
     path: "", //no url needed as this has submenu
     icon: <DocumentDuplicateIcon className={`${iconClasses} inline`} />, // icon component
     name: "Pages", // name that appear in Sidebar
@@ -90,8 +95,8 @@ const routes = [
         path: "/register", //url
         icon: <UserIcon className={submenuIconClasses} />, // icon component
         name: "Register", // name that appear in Sidebar
-      },
-      {
+      }, 
+    {
         path: "/forgot-password",
         icon: <KeyIcon className={submenuIconClasses} />,
         name: "Forgot Password",
@@ -106,18 +111,15 @@ const routes = [
         icon: <ExclamationTriangleIcon className={submenuIconClasses} />,
         name: "404",
       },
+    
     ],
-  },
-  {
+  }, */
+ /*  {
     path: "", //no url needed as this has submenu
     icon: <Cog6ToothIcon className={`${iconClasses} inline`} />, // icon component
     name: "Settings", // name that appear in Sidebar
     submenu: [
-      {
-        path: "/app/settings-profile", //url
-        icon: <UserIcon className={submenuIconClasses} />, // icon component
-        name: "Profile", // name that appear in Sidebar
-      },
+      
       {
         path: "/app/settings-billing",
         icon: <WalletIcon className={submenuIconClasses} />,
@@ -129,7 +131,7 @@ const routes = [
         name: "Team Members", // name that appear in Sidebar
       },
     ],
-  },
+  }, */
   {
     path: "", //no url needed as this has submenu
     icon: <DocumentTextIcon className={`${iconClasses} inline`} />, // icon component

@@ -197,6 +197,7 @@ const ActionButton = ({
           userEmail={userEmail}
           updateCounter={updateCounter}
           setUpdateCounter={setUpdateCounter}
+          conversionRate = {conversionRate}
           
         />
       )}

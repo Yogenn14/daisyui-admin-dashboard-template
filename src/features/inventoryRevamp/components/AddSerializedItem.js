@@ -1,7 +1,7 @@
 import React from "react";
 import SerializedForm from "./SerializedForm";
 
-const AddSerializedItem = ({open,closeModal,inventoryId,partNumber,partDescription,userEmail,updateCounter,setUpdateCounter}) => {
+const AddSerializedItem = ({open,closeModal,inventoryId,partNumber,partDescription,userEmail,updateCounter,setUpdateCounter,conversionRate}) => {
 
     const button = "false";
 
@@ -30,6 +30,7 @@ const AddSerializedItem = ({open,closeModal,inventoryId,partNumber,partDescripti
         userEmail={userEmail}
         updateCounter={updateCounter}
         setUpdateCounter={setUpdateCounter}
+        conversionRate={conversionRate}
         />
             </div>
        

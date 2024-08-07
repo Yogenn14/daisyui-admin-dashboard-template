@@ -616,6 +616,7 @@ function Row(props) {
           userEmail={props.userEmail}
           updateCounter={props.updateCounter}
           setUpdateCounter={props.setUpdateCounter}
+          conversionRate= {props.conversionRate}
           
           />
         )}

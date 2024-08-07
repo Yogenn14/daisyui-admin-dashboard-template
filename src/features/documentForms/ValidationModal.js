@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import InventoryModal from "./InventoryModal";
 
-const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) => {
+const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail, conversionRate }) => {
   const [validationFailed, setValidationFailed] = useState(false);
   const [errorMessages, setErrorMessages] = useState([]);
   const [poData, setPOdata] = useState([]);
@@ -243,6 +243,8 @@ const ValidationModal = ({ isOpen, onRequestClose, combinedData, userEmail }) =>
           poData={poData}
           closeModal={() => setInventoryModal(false)}
           userEmail={userEmail}
+          moc = {poData.moc}
+          conversionRate = {conversionRate}
         />
       )}
     </div>
