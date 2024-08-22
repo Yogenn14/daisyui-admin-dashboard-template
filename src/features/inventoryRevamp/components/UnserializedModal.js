@@ -32,6 +32,8 @@ const UnserializedModal = ({
 
   const [totalPrice, setTotalPrice] = useState(0);
   const [convertedUnitPrice, setConvertedUnitPrice] = useState(0);
+  const [convertedshippingPriceBatch, setConvertedShippingPriceBatch] = useState(0);
+  const [convertedcustomsPrice, setConvertedCustomsPrice] = useState(0);
   const [convertedTotalPrice, setConvertedTotalPrice] = useState(0);
   const [errors, setErrors] = useState({});
   const [existMessage, setExistMessage] = useState();
@@ -43,11 +45,15 @@ const UnserializedModal = ({
     if (formData.currency === "MYR") {
       setConvertedUnitPrice(formData.unitPrice / conversionRate);
       setConvertedTotalPrice(formData.unitPrice * formData.quantity / conversionRate);
+      setConvertedShippingPriceBatch(formData.shippingPriceBatch/conversionRate);
+      setConvertedCustomsPrice(formData.customsPerBatch / conversionRate)
     } else {
       setConvertedUnitPrice(0);
       setConvertedTotalPrice(0);
+      setConvertedShippingPriceBatch(0);
+      setConvertedCustomsPrice(0)
     }
-  }, [formData.unitPrice, formData.quantity, formData.currency, conversionRate]);
+  }, [formData.unitPrice, formData.quantity, formData.currency, conversionRate, formData.shippingPriceBatch, formData.customsPerBatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,6 +90,8 @@ const UnserializedModal = ({
         ...formData,
         unitPrice: formData.currency === "MYR" ? convertedUnitPrice : formData.unitPrice,
         totalPrice: formData.currency === "MYR" ? convertedTotalPrice : totalPrice,
+        shippingPriceBatch  : formData.currency === "MYR" ? convertedshippingPriceBatch : formData.shippingPriceBatch,
+        customsPerBatch : formData.customsPerBatch === "MYR" ? convertedcustomsPrice : formData.customsPerBatch,
         conversionRate : formData.currency === "MYR" ? conversionRate : 0
       };
   
@@ -151,13 +159,13 @@ const UnserializedModal = ({
           closeUnserializedModal={closeUnserializedModal}
         />
       ) : (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75 overflow-y-auto">
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-lg p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
+        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-lg p-4 max-h-full overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Add New Part [UNSERIALIZED]
             </h3>
             <form onSubmit={handleSubmit}>
-              <div className="mb-4">
+              <div className="mb-4 overflow-y-auto">
                 <label className="block text-gray-700 text-sm">
                   Part Description
                 </label>
@@ -305,6 +313,36 @@ const UnserializedModal = ({
                 )}
               </div>
               <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Shipping Price Per Batch</label>
+                <input
+                  type="number"
+                  name="shippingPriceBatch"
+                  step="0.01"
+                  value={formData.shippingPriceBatch}
+                  onChange={handleChange}
+                  className="input input-bordered w-full input-xs"
+                  required
+                />
+                {errors.shippingPriceBatch && (
+                  <p className="text-red-500 text-sm">{errors.shippingPriceBatch}</p>
+                )}
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Customs Price Per Batch</label>
+                <input
+                  type="number"
+                  name="customsPerBatch"
+                  step="0.01"
+                  value={formData.customsPerBatch}
+                  onChange={handleChange}
+                  className="input input-bordered w-full input-xs"
+                  required
+                />
+                {errors.customsPerBatch && (
+                  <p className="text-red-500 text-sm">{errors.customsPerBatch}</p>
+                )}
+              </div>
+              <div className="mb-4">
                 <label className="block text-gray-700 text-sm">Total Price</label>
                 <input
                   type="number"
@@ -338,6 +376,24 @@ const UnserializedModal = ({
                     <input
                       type="number"
                       value={convertedTotalPrice}
+                      className="input input-bordered w-full input-xs"
+                      disabled
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm">Converted Shipment Price Per Batch</label>
+                    <input
+                      type="number"
+                      value={convertedshippingPriceBatch}
+                      className="input input-bordered w-full input-xs"
+                      disabled
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm">Converted Customs Price Per Batch</label>
+                    <input
+                      type="number"
+                      value={convertedcustomsPrice}
                       className="input input-bordered w-full input-xs"
                       disabled
                     />

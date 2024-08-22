@@ -19,6 +19,9 @@ import UsersIcon from "@heroicons/react/24/outline/UsersIcon";
 import KeyIcon from "@heroicons/react/24/outline/KeyIcon";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
 import { InboxStackIcon } from "@heroicons/react/24/solid";
+import UserGroup from "@heroicons/react/24/solid/UserGroupIcon"
+import ChatBubbleOvalLeftEllipsis from "@heroicons/react/24/solid/ChatBubbleOvalLeftEllipsisIcon"
+
 
 const iconClasses = `h-6 w-6`;
 const submenuIconClasses = `h-5 w-5`;
@@ -31,13 +34,13 @@ const routes = [
   },
   {
     path: "/app/leads", // url
-    icon: <InboxArrowDownIcon className={iconClasses} />, // icon component
+    icon: <UserGroup className={iconClasses} />, // icon component
     name: "Staffs/Users", // name that appear in Sidebar
   },
   {
-    path: "/app/transactions", // url
-    icon: <CurrencyDollarIcon className={iconClasses} />, // icon component
-    name: "Transactions", // name that appear in Sidebar
+    path: "/app/contacts", // url
+    icon: <ChatBubbleOvalLeftEllipsis className={iconClasses} />, // icon component
+    name: "Contact Database", // name that appear in Sidebar
   },
   {
     path: "/app/inventory",

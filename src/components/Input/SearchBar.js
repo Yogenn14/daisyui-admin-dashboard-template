@@ -25,14 +25,7 @@ function SearchBar({
           placeholder={placeholderText || "Search"}
           onChange={(e) => updateSearchInput(e.target.value)}
         />
-        <select
-          className="select select-bordered join-item"
-          onChange={(e) => updateFilterType(e.target.value)}
-        >
-          <option value="partDescription">Part Desc</option>
-          <option value="partNumber">Part Num</option>
-          <option value="serialNumber">Serial Num</option>
-        </select>
+      
       </div>
     </div>
   );

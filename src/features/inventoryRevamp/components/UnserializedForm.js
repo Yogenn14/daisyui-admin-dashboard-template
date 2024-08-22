@@ -28,6 +28,8 @@ const UnserializedForm = ({
   const [totalPrice, setTotalPrice] = useState(0);
   const [convertedUnitPrice, setConvertedUnitPrice] = useState(0);
   const [convertedTotalPrice, setConvertedTotalPrice] = useState(0);
+  const [convertedcustomsPrice, setConvertedCustomsPrice] = useState(0);
+  const [convertedshippingPrice, setConvertedShippingPrice] = useState(0);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -37,11 +39,13 @@ const UnserializedForm = ({
     if (formData.currency === "MYR") {
       setConvertedUnitPrice(formData.unitPrice / conversionRate);
       setConvertedTotalPrice(price /conversionRate);
+      setConvertedCustomsPrice(formData.customsPerBatch / conversionRate);
+      setConvertedShippingPrice(formData.shippingPriceBatch / conversionRate)
     } else {
       setConvertedUnitPrice(0);
       setConvertedTotalPrice(0);
     }
-  }, [formData.unitPrice, formData.quantityChange, formData.currency, conversionRate]);
+  }, [formData.unitPrice, formData.quantityChange, formData.currency, conversionRate, formData.customsPerBatch, formData.shippingPriceBatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,6 +79,8 @@ const UnserializedForm = ({
           unitPrice: formData.currency === "MYR" ? convertedUnitPrice : formData.unitPrice,
           totalPrice: formData.currency === "MYR" ? convertedTotalPrice : totalPrice,
           conversionRate: formData.currency === "MYR" ? conversionRate[0] : 0,
+          shippingPriceBatch  : formData.currency === "MYR" ? convertedshippingPrice : formData.shippingPriceBatch,
+          customsPerBatch : formData.currency === "MYR" ? convertedcustomsPrice : formData.customsPerBatch,
         };
 
         const response = await fetch(
@@ -246,6 +252,36 @@ const UnserializedForm = ({
             )}
           </div>
           <div className="mb-4">
+            <label className="block text-gray-700 text-sm">Shipping Price Per Batch</label>
+            <input
+              type="number"
+              name="shippingPriceBatch"
+              step="0.01"
+              value={formData.shippingPriceBatch}
+              onChange={handleChange}
+              className="input input-bordered w-full input-xs"
+              required
+            />
+            {errors.shippingPriceBatch && (
+              <p className="text-red-500 text-sm">{errors.shippingPriceBatch}</p>
+            )}
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm">Customs Price Per Batch</label>
+            <input
+              type="number"
+              name="customsPerBatch"
+              step="0.01"
+              value={formData.customsPerBatch}
+              onChange={handleChange}
+              className="input input-bordered w-full input-xs"
+              required
+            />
+            {errors.customsPerBatch && (
+              <p className="text-red-500 text-sm">{errors.customsPerBatch}</p>
+            )}
+          </div>
+          <div className="mb-4">
             <label className="block text-gray-700 text-sm">Total Price</label>
             <input
               type="number"
@@ -279,6 +315,24 @@ const UnserializedForm = ({
                 <input
                   type="number"
                   value={convertedTotalPrice}
+                  className="input input-bordered w-full input-xs"
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Converted Shipping Price Per Batch</label>
+                <input
+                  type="number"
+                  value={convertedshippingPrice}
+                  className="input input-bordered w-full input-xs"
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm">Converted Customs Price Per Batch</label>
+                <input
+                  type="number"
+                  value={convertedcustomsPrice}
                   className="input input-bordered w-full input-xs"
                   disabled
                 />

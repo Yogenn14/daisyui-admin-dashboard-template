@@ -123,7 +123,7 @@ function Row(props) {
             {row.quantity}
           </TableCell>
           <TableCell align="right" sx={cellBorderStyle}>
-            {formatToMalaysianTime(row.inDate)}
+            {formatToMalaysianTime(row.inDate) === "January 1, 1970" ? "-" : formatToMalaysianTime(row.inDate)}
           </TableCell>
           <TableCell align="right" sx={cellBorderStyle}>
             {row.outDate === null ? "-" : formatToMalaysianTime(row.outDate)}
@@ -202,6 +202,12 @@ function Row(props) {
                             Unit Price (USD)
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
+                            Shipping Price Per Unit (USD)
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Customs Price Per Unit (USD)
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
                             In Date
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
@@ -215,6 +221,12 @@ function Row(props) {
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Customer
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Selling Price (USD)
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Profit (USD)
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             User Email
@@ -257,6 +269,12 @@ function Row(props) {
                               {serialRow.unitPrice}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
+                              {serialRow.shippingPricePerUnit}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {serialRow.customsPerUnit}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
                               {formatToMalaysianTime(serialRow.inDate)}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
@@ -270,6 +288,12 @@ function Row(props) {
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
                               {serialRow.customer}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {serialRow.sellingPrice}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {serialRow.profit}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
                               {serialRow.userEmail}
@@ -746,7 +770,12 @@ function SemiconductorTable({
                 userEmail: serial.userEmail,
                 customer: serial.customer,
                 warrantyEndDate: serial.warrantyEndDate,
-                unitPrice : serial.unitPrice
+                unitPrice : serial.unitPrice,
+                shippingPricePerUnit : serial.shippingPricePerUnit,
+                customsPerUnit : serial.customsPerUnit,
+                sellingPrice: serial.sellingPrice,
+                profit : serial.profit
+
               })),
               []
             );

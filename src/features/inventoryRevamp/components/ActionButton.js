@@ -86,6 +86,10 @@ const ActionButton = ({
     setUnserializedModal(false);
   };
 
+  const navigateToDocForm = () => {
+    navigate("/app/documentform");
+  };
+
   return (
     <div>
       <div className="dropdown mb-2">
@@ -140,7 +144,7 @@ const ActionButton = ({
           className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64"
         >
           <li>
-            <a onClick={openPOmodal}>Generate/Add Via PO</a>
+            <a onClick={navigateToDocForm}>Generate/Add Via PO</a>
           </li>
           <li>
             <a onClick={openModal}>Add New Part [Serialized]</a>

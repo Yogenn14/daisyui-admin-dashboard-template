@@ -54,7 +54,7 @@ const ShipOutUnsModal = ({
 
     try {
       const response = await fetch(
-        `http://localhost:8083/api/inventory/shipOutUnserialized/${selectedUnsInvId}`,
+        `${process.env.REACT_APP_NODE_API_SERVER}inventory/shipOutUnserialized/${selectedUnsInvId}`,
         {
           method: "POST",
           headers: {

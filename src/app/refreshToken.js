@@ -20,6 +20,7 @@ const refreshAccessTokenOnReload = async () => {
       return accessToken;
     } catch (error) {
       console.error("Failed to refresh access token:", error);
+      window.location.href = "/login";
     }
   }
 };
@@ -44,10 +45,14 @@ const refreshAccessTokenOnInitialLoad = async () => {
       return accessToken;
     } catch (error) {
       console.error("Failed to refresh access token on initial load:", error);
-      // Handle error (e.g., redirect to login page)
-      window.location.href = "/login";
+      
+      // Only redirect to login if not already on the login page
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
   }
 };
+
 
 export { refreshAccessTokenOnReload, refreshAccessTokenOnInitialLoad };

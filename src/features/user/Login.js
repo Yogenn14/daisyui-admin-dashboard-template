@@ -102,13 +102,13 @@ function Login() {
                 />
               </div>
 
-              <div className="text-right text-primary">
+            {/*   <div className="text-right text-primary">
                 <Link to="/forgot-password">
                   <span className="text-sm  inline-block  hover:text-primary hover:underline hover:cursor-pointer transition duration-200">
                     Forgot Password?
                   </span>
                 </Link>
-              </div>
+              </div> */}
 
               <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
               <button
@@ -120,14 +120,14 @@ function Login() {
                 Login
               </button>
 
-              <div className="text-center mt-4">
+              {/* <div className="text-center mt-4">
                 Don't have an account yet?{" "}
                 <Link to="/register">
                   <span className="  inline-block  hover:text-primary hover:underline hover:cursor-pointer transition duration-200">
                     Register
                   </span>
                 </Link>
-              </div>
+              </div> */}
             </form>
           </div>
         </div>

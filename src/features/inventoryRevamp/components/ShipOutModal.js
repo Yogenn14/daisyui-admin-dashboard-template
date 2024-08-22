@@ -13,7 +13,8 @@ const ShipOutModal = ({
 }) => {
   const [customer, setCustomer] = useState("");
   const [outDate, setOutDate] = useState("");
-  const [sellingPrice,setSellingPrice] = useState(0)
+  const [sellingPrice,setSellingPrice] = useState(0);
+  const [paymentDate,setPaymentDate] = useState("")
   const [error, setError] = useState("");
   const dispatch = useDispatch();
 
@@ -23,6 +24,7 @@ const ShipOutModal = ({
       outDate,
       customer,
       sellingPrice,
+      paymentDate,
       userEmail,
     };
 
@@ -107,7 +109,17 @@ const ShipOutModal = ({
                   />
                 </div>
                 <div className="mt-4 ml-6 gap-2 w-3/4">
-                  <p className="ml-4 mb-2">Selling Price</p>
+                  <p className="ml-4 mb-2">Payment Date</p>
+                  <input
+                    type="date"
+                    className="input input-bordered"
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mt-4 ml-6 gap-2 w-3/4">
+                  <p className="ml-4 mb-2">Selling Price (USD)</p>
                   <input
                     type="number"
                     step={'0.01'}

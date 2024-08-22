@@ -25,6 +25,8 @@ const SerializedForm = ({
   const [customer, setCustomer] = useState("");
   const [warrantyEndDate, setWarrantyEndDate] = useState("");
   const [currency, setCurrency] = useState("USD");
+  const [shippingPricePerUnit, setShippingPricePerUnit] = useState("");
+  const [customsPerUnit,setCustomsPerUnit] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
@@ -40,6 +42,8 @@ const SerializedForm = ({
       status,
       manufactureroem,
       unitPrice: currency === "MYR" ? unitPrice/conversionRate : unitPrice,
+      shippingPricePerUnit: currency === "MYR" ? shippingPricePerUnit/conversionRate : shippingPricePerUnit,
+      customsPerUnit: currency === "MYR" ? customsPerUnit/conversionRate : customsPerUnit,
       inDate,
       outDate,
       currency,
@@ -110,10 +114,10 @@ const SerializedForm = ({
                 </div>
               )}
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow input-xs input-xs"
                     placeholder="Serial Number"
                     value={serialNumber}
                     onChange={(e) => setSerialNumber(e.target.value)}
@@ -122,9 +126,9 @@ const SerializedForm = ({
               </div>
 
               <div className="mb-4">
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 input-sm">
                   <select
-                    className="grow select select-bordered"
+                    className="grow select-sm select select-bordered"
                     value={condition}
                     onChange={(e) => setCondition(e.target.value)}
                     required
@@ -137,10 +141,10 @@ const SerializedForm = ({
               </div>
 
               <div className="mb-4">
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 input-sm">
                   Currency
                   <select
-                    className="grow select select-bordered"
+                    className="grow select-sm select select-bordered"
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
                     required
@@ -151,27 +155,13 @@ const SerializedForm = ({
                 </label>
               </div>
 
-              {currency === "MYR" && (
-                <>
-                  <div className="mb-4">
-                    <label className="input input-bordered flex items-center gap-2">
-                      Converted Unit Price
-                      <input
-                        type="text"
-                        className="grow"
-                        value={(unitPrice / conversionRate).toFixed(2)}
-                        disabled
-                      />
-                    </label>
-                  </div>
-                </>
-              )}
+             
 
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow input-xs"
                     placeholder="Status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
@@ -180,10 +170,10 @@ const SerializedForm = ({
                 </label>
               </div>
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow input-xs"
                     placeholder="Manufacturer OEM"
                     value={manufactureroem}
                     onChange={(e) => setManufactureroem(e.target.value)}
@@ -192,11 +182,11 @@ const SerializedForm = ({
                 </label>
               </div>
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="number"
                     step="0.01"
-                    className="grow"
+                    className="grow input-xs"
                     placeholder="Unit Price"
                     value={unitPrice}
                     onChange={(e) => {
@@ -208,11 +198,81 @@ const SerializedForm = ({
                 </label>
               </div>
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="grow input-xs"
+                    placeholder="Shipping Price Per Unit"
+                    value={shippingPricePerUnit}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setShippingPricePerUnit(value === "" ? "" : parseFloat(value));
+                    }}
+                    required
+                  />
+                </label>
+              </div>
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="grow input-xs"
+                    placeholder="Customs Per Unit"
+                    value={customsPerUnit}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setCustomsPerUnit(value === "" ? "" : parseFloat(value));
+                    }}
+                    required
+                  />
+                </label>
+              </div>
+              
+              {currency === "MYR" && (
+                <>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2 input-sm text-xs">
+                      Converted Unit Price
+                      <input
+                        type="text"
+                        className="grow input-xs"
+                        value={(unitPrice / conversionRate).toFixed(2)}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2 input-sm text-xs">
+                      Converted Shipping Price Per Unit
+                      <input
+                        type="text"
+                        className="grow input-xs"
+                        value={(shippingPricePerUnit / conversionRate).toFixed(2)}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2 input-sm text-xs">
+                      Converted Customs Price Per Unit
+                      <input
+                        type="text"
+                        className="grow input-xs"
+                        value={(customsPerUnit / conversionRate).toFixed(2)}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   In Date
                   <input
                     type="date"
-                    className="grow"
+                    className="grow input-xs"
                     value={inDate}
                     onChange={(e) => setInDate(e.target.value)}
                     required
@@ -221,11 +281,11 @@ const SerializedForm = ({
               </div>
 
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   Warranty End Date
                   <input
                     type="date"
-                    className="grow"
+                    className="grow input-xs"
                     value={warrantyEndDate}
                     onChange={(e) => setWarrantyEndDate(e.target.value)}
                     required
@@ -234,10 +294,10 @@ const SerializedForm = ({
               </div>
 
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow input-xs"
                     placeholder="Supplier"
                     value={supplier}
                     onChange={(e) => setSupplier(e.target.value)}
