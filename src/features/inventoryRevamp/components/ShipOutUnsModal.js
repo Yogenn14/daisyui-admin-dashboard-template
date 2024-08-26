@@ -9,7 +9,7 @@ const ShipOutUnsModal = ({
   outunsID,
   userEmail,
   updateCounter,
-  setUpdateCounter
+  setUpdateCounter,
 }) => {
   const handleClose = () => {
     setshipOutUnsModal(false);
@@ -19,7 +19,6 @@ const ShipOutUnsModal = ({
   const [date, setDate] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
-
 
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
@@ -43,10 +42,11 @@ const ShipOutUnsModal = ({
       shipments: shipments.map((shipment) => ({
         unserializedInId: outunsID,
         quantity: parseInt(shipment.quantity),
-        perUnitSellingPrice : shipment.perUnitSellingPrice,
+        perUnitSellingPrice: shipment.perUnitSellingPrice,
         customer: shipment.customer,
+        paymentDate: shipment.paymentDate,
         date: date,
-        userEmail:userEmail
+        userEmail: userEmail,
       })),
     };
     console.log("Payload to be sent:", JSON.stringify(payload));
@@ -70,21 +70,22 @@ const ShipOutUnsModal = ({
       }
 
       const data = await response.json();
-       dispatch(
-            showNotification({
-              message: "Successfully shiped out item",
-              status: 1,
-            })
-          );   
-        setshipOutUnsModal(false);
-        setUpdateCounter(updateCounter + 1)
+      dispatch(
+        showNotification({
+          message: "Successfully shiped out item",
+          status: 1,
+        })
+      );
+      setshipOutUnsModal(false);
+      setUpdateCounter(updateCounter + 1);
     } catch (error) {
       dispatch(
         showNotification({
           message: "Error shipping out",
           status: 0,
         })
-      );      setErrorMessage(error.message);
+      );
+      setErrorMessage(error.message);
     }
   };
 
@@ -128,54 +129,74 @@ const ShipOutUnsModal = ({
                     {shipments.map((shipment, index) => (
                       <div
                         key={index}
-                        className="items-center space-x-2 mb-2 bg-gray-100 p-2 rounded-lg"
+                        className="bg-gray-100 p-4 mb-2 rounded-lg space-y-4"
                       >
-                        <input
-                          type="text"
-                          name="customer"
-                          placeholder="Customer name"
-                          value={shipment.customer}
-                          onChange={(e) => handleInputChange(index, e)}
-                          className="border border-gray-300 ml-2 rounded-md px-3 py-2 w-1/2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                        <input
-                          type="number"
-                          name="quantity"
-                          placeholder="Quantity"
-                          value={shipment.quantity}
-                          onChange={(e) => handleInputChange(index, e)}
-                          className="border border-gray-300 rounded-md px-3 py-2 w-1/4 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                        <div className="mt-2 w-full space-x-4">
-                          <input
-                          type="number"
-                          name="perUnitSellingPrice"
-                          placeholder="Per Unit Selling Price(USD)"
-                          value={shipment.perUnitSellingPrice}
-                          onChange={(e) => handleInputChange(index, e)}
-                          className="border border-gray-300 rounded-md px-3 py-2  w-3/4 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
-                    
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveCustomer(index)}
-                          className="text-red-600 hover:text-red-700 focus:outline-none"
-                        >
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
+                        <div className="flex items-center space-x-4">
+                          <div className="w-1/2">
+                            <label className="block text-gray-700 text-sm font-medium mb-1">
+                              Customer Name
+                            </label>
+                            <input
+                              type="text"
+                              name="customer"
+                              placeholder="Customer name"
+                              value={shipment.customer}
+                              onChange={(e) => handleInputChange(index, e)}
+                              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                             />
-                          </svg>
-                        </button>
-                      </div>
+                          </div>
+                          <div className="w-1/4">
+                            <label className="block text-gray-700 text-sm font-medium mb-1">
+                              Quantity
+                            </label>
+                            <input
+                              type="number"
+                              name="quantity"
+                              placeholder="Quantity"
+                              value={shipment.quantity}
+                              onChange={(e) => handleInputChange(index, e)}
+                              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                          <div className="w-1/2">
+                            <label className="block text-gray-700 text-sm font-medium mb-1">
+                              Per Unit Selling Price (USD)
+                            </label>
+                            <input
+                              type="number"
+                              name="perUnitSellingPrice"
+                              placeholder="Per Unit Selling Price (USD)"
+                              value={shipment.perUnitSellingPrice}
+                              onChange={(e) => handleInputChange(index, e)}
+                              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            />
+                          </div>
+                          <div className="w-1/2">
+                            <label className="block text-gray-700 text-sm font-medium mb-1">
+                              Payment Date
+                            </label>
+                            <input
+                              type="date"
+                              name="paymentDate"
+                              value={shipment.paymentDate}
+                              onChange={(e) => handleInputChange(index, e)}
+                              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCustomer(index)}
+                            className="btn btn-sm bg-red-500 text-white"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     ))}
                     <button
