@@ -152,6 +152,14 @@ const EditSerializedModal = ({
                         onChange={handleInputChange}
                         className="border w-full p-2 mb-2"
                       />
+                      <label>Supplier</label>
+                      <input
+                        type="text"
+                        name="supplier"
+                        value={formData.supplier}
+                        onChange={handleInputChange}
+                        className="border w-full p-2 mb-2"
+                      />
                       <label>In Date</label>
                       <input
                         type="date"

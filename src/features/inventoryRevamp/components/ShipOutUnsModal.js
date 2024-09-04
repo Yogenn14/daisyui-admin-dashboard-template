@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import axios from "axios";
 import { showNotification } from "../../common/headerSlice";
 
 const ShipOutUnsModal = ({
@@ -53,48 +54,48 @@ const ShipOutUnsModal = ({
     console.log("Inv ID", selectedUnsInvId);
 
     try {
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_NODE_API_SERVER}inventory/shipOutUnserialized/${selectedUnsInvId}`,
+        payload,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload),
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error);
-      }
-
-      const data = await response.json();
       dispatch(
         showNotification({
-          message: "Successfully shiped out item",
+          message: "Successfully shipped out item",
           status: 1,
         })
       );
       setshipOutUnsModal(false);
       setUpdateCounter(updateCounter + 1);
     } catch (error) {
+      const errorMsg = error.response?.data?.error || "Error shipping out";
       dispatch(
         showNotification({
-          message: "Error shipping out",
+          message: errorMsg,
           status: 0,
         })
       );
-      setErrorMessage(error.message);
+      setErrorMessage(errorMsg);
     }
   };
 
   return (
-    <div className={`relative z-50 ${open ? "block" : "hidden"}`}>
+    <div
+      className="relative z-50"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
       <div
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
         aria-hidden="true"
       ></div>
+
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
           <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">

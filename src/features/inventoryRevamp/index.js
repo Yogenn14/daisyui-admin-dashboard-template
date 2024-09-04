@@ -4,7 +4,7 @@ import { setPageTitle } from "../../features/common/headerSlice";
 import Table from "./components/Table";
 import ActionButton from "./components/ActionButton";
 import Alert from "./components/Alert";
-import {jwtDecode} from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
 function InternalPage() {
   const dispatch = useDispatch();
@@ -17,7 +17,7 @@ function InternalPage() {
   const [myrToUsdRate, setMyrToUsdRate] = useState(null);
 
   useEffect(() => {
-    dispatch(setPageTitle({ title: "Inventory" }));
+    dispatch(setPageTitle({ title: "Inventory Database" }));
 
     const token = localStorage.getItem("token");
     if (token) {
@@ -72,7 +72,7 @@ function InternalPage() {
         setUpdateCounter={setUpdateCounter}
         showUpdateModal={showUpdateModal}
         setShowUpdateModal={setShowUpdateModal}
-        conversionRate = {myrToUsdRate}
+        conversionRate={myrToUsdRate}
       />
       <Table
         result={result}
@@ -85,9 +85,8 @@ function InternalPage() {
         setUpdateCounter={setUpdateCounter}
         showUpdateModal={showUpdateModal}
         setShowUpdateModal={setShowUpdateModal}
-        conversionRate = {myrToUsdRate}
+        conversionRate={myrToUsdRate}
       />
-     
     </div>
   );
 }

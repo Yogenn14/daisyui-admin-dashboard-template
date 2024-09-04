@@ -20,6 +20,11 @@ import ShipOutUnsModal from "./ShipOutUnsModal";
 import UnserializedForm from "./UnserializedForm";
 import AddSerializedItem from "./AddSerializedItem";
 import EditSerializedModal from "./EditSerializedModal";
+import EditUnserializedModal from "./EditUnserializedModal";
+import RevertShipment from "./RevertShipment";
+import EditShippedOutModal from "./EditShippedOutModal";
+import ImageModal from "./ImageModal";
+import SerializedImageModal from "./SerializedImageModal";
 
 function Row(props) {
   const { row } = props;
@@ -39,6 +44,17 @@ function Row(props) {
   const [selectedSerialInvID, setSelectedSerialInvID] = useState(0);
   const [editSerializedModal, setEditSerializedModal] = useState(false);
   const [selectedEditSerialized, setSelectedEditSerialized] = useState();
+  const [editUnserializedModal, seteditUnserializedModal] = useState(false);
+  const [selectedEditUnserialziedModal, setSelectedUnEditSerialized] =
+    useState();
+  const [selectedRevert, setSelectedRevert] = useState();
+  const [revertModal, setRevertModal] = useState(false);
+  const [editShippedOut, setEditShippedOut] = useState();
+  const [editShipOut, setEditShipOut] = useState(false);
+  const [imageModal, setImageModal] = useState(false);
+  const [imagePath, setImagePath] = useState();
+  const [serializedImageModal, setSerializedImageModal] = useState(false);
+  const [serialRow, setSerialRow] = useState();
 
   const handleShipOutClick = () => {
     setShipOutMode(!shipOutMode);
@@ -81,6 +97,31 @@ function Row(props) {
 
     setSelectedEditSerialized(serialRow);
     setEditSerializedModal(true);
+  };
+
+  const handleEditUnserializedModal = (unserialRow) => {
+    setSelectedUnEditSerialized(unserialRow);
+    seteditUnserializedModal(true);
+  };
+
+  const handleRevertShipment = (unserialRow) => {
+    setSelectedRevert(unserialRow);
+    setRevertModal(true);
+  };
+
+  const handleEditShippedOut = (unserialRow) => {
+    setEditShippedOut(unserialRow);
+    setEditShipOut(true);
+  };
+
+  const handleImageModal = (unserialRow) => {
+    setImageModal(true);
+    setImagePath(unserialRow);
+  };
+
+  const handleSerializedImageModal = (serialRow) => {
+    setSerializedImageModal(true);
+    setSerialRow(serialRow);
   };
 
   const formatToMalaysianTime = (utcTime) => {
@@ -137,8 +178,9 @@ function Row(props) {
             {row.outDate === null ? "-" : formatToMalaysianTime(row.outDate)}
           </TableCell>
           <TableCell align="right" sx={cellBorderStyle}>
-            {row.type === "serialized" ? "-" : row.serialData.condition || "-"}
+            {row.consumables === true ? "Consumables" : "-"}
           </TableCell>
+
           <TableCell align="right" sx={cellBorderStyle}>
             {row.type === "serialized" ? "-" : row.serialData.status || "-"}
           </TableCell>
@@ -205,6 +247,9 @@ function Row(props) {
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Manufacturer/OEM
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Image
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Currency
@@ -288,6 +333,16 @@ function Row(props) {
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
                               {serialRow.manufacturer}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              <div
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  handleSerializedImageModal(serialRow)
+                                }
+                              >
+                                IMG
+                              </div>
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
                               {serialRow.currency}
@@ -434,7 +489,13 @@ function Row(props) {
                             Manufacturer/OEM
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
+                            Image
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
                             In Date
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Warranty End Date
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Stock
@@ -447,6 +508,12 @@ function Row(props) {
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Total Price (USD)
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Shipping Price Per Batch (USD)
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            Customs Per Batch (USD)
                           </TableCell>
                           <TableCell align="right" sx={cellBorderStyle}>
                             Currency
@@ -490,8 +557,25 @@ function Row(props) {
                                 {unserialRow.manufacturer}
                               </TableCell>
                               <TableCell align="right" sx={cellBorderStyle}>
+                                <div
+                                  className="cursor-pointer"
+                                  onClick={() => handleImageModal(unserialRow)}
+                                >
+                                  IMG
+                                </div>
+                              </TableCell>
+
+                              <TableCell align="right" sx={cellBorderStyle}>
                                 {formatToMalaysianTime(unserialRow.date)}
                               </TableCell>
+                              <TableCell align="right" sx={cellBorderStyle}>
+                                {unserialRow.warrantyEndDate
+                                  ? formatToMalaysianTime(
+                                      unserialRow.warrantyEndDate
+                                    )
+                                  : "-"}
+                              </TableCell>
+
                               <TableCell align="right" sx={cellBorderStyle}>
                                 <p
                                   className={
@@ -511,6 +595,12 @@ function Row(props) {
                               </TableCell>
                               <TableCell align="right" sx={cellBorderStyle}>
                                 <p>{unserialRow.totalPrice}</p>
+                              </TableCell>
+                              <TableCell align="right" sx={cellBorderStyle}>
+                                <p>{unserialRow.shippingPerBatch}</p>
+                              </TableCell>
+                              <TableCell align="right" sx={cellBorderStyle}>
+                                <p>{unserialRow.customsPerBatch}</p>
                               </TableCell>
                               <TableCell align="right" sx={cellBorderStyle}>
                                 <p>{unserialRow.currency}</p>
@@ -542,7 +632,18 @@ function Row(props) {
                                 >
                                   Ship Out
                                 </Button>
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  sx={{ mt: 1 }}
+                                  onClick={() =>
+                                    handleEditUnserializedModal(unserialRow)
+                                  }
+                                >
+                                  Edit
+                                </Button>
                               </TableCell>
+
                               <TableCell align="right" sx={cellBorderStyle}>
                                 {unserialRow.unserializedOut.length > 0 && (
                                   <Collapse
@@ -602,6 +703,12 @@ function Row(props) {
                                           >
                                             User Email
                                           </TableCell>
+                                          <TableCell
+                                            align="right"
+                                            sx={cellBorderStyle}
+                                          >
+                                            Action
+                                          </TableCell>
                                         </TableRow>
                                       </TableHead>
                                       <TableBody>
@@ -658,6 +765,35 @@ function Row(props) {
                                                 sx={cellBorderStyle}
                                               >
                                                 {outItem.userEmail}
+                                              </TableCell>
+                                              <TableCell
+                                                align="right"
+                                                sx={cellBorderStyle}
+                                              >
+                                                <Button
+                                                  variant="contained"
+                                                  size="small"
+                                                  sx={{ mt: 1 }}
+                                                  onClick={() =>
+                                                    handleEditShippedOut(
+                                                      unserialRow
+                                                    )
+                                                  }
+                                                >
+                                                  Edit
+                                                </Button>
+                                                <Button
+                                                  variant="contained"
+                                                  size="small"
+                                                  sx={{ mt: 1 }}
+                                                  onClick={() =>
+                                                    handleRevertShipment(
+                                                      unserialRow
+                                                    )
+                                                  }
+                                                >
+                                                  REVERT
+                                                </Button>
                                               </TableCell>
                                             </TableRow>
                                           )
@@ -738,6 +874,61 @@ function Row(props) {
             conversionRate={props.conversionRate}
           />
         )}
+
+        {editUnserializedModal && (
+          <EditUnserializedModal
+            open={editUnserializedModal}
+            onClose={() => seteditUnserializedModal(false)}
+            selectedEditUnserialziedModal={selectedEditUnserialziedModal}
+            userEmail={props.userEmail}
+            updateCounter={props.updateCounter}
+            setUpdateCounter={props.setUpdateCounter}
+            conversionRate={props.conversionRate}
+          />
+        )}
+
+        {revertModal && (
+          <RevertShipment
+            open={revertModal}
+            onClose={() => setRevertModal(false)}
+            selectedRevert={selectedRevert}
+            userEmail={props.userEmail}
+            updateCounter={props.updateCounter}
+            setUpdateCounter={props.setUpdateCounter}
+          />
+        )}
+
+        {editShipOut && (
+          <EditShippedOutModal
+            open={revertModal}
+            onClose={() => setEditShipOut(false)}
+            editShippedOut={editShippedOut}
+            userEmail={props.userEmail}
+            updateCounter={props.updateCounter}
+            setUpdateCounter={props.setUpdateCounter}
+          />
+        )}
+        {imageModal && (
+          <ImageModal
+            open={imageModal}
+            onClose={() => setImageModal(false)}
+            imagePath={imagePath}
+            updateCounter={props.updateCounter}
+            setUpdateCounter={props.setUpdateCounter}
+            userEmail={props.userEmail}
+          />
+        )}
+
+        {serializedImageModal && (
+          <SerializedImageModal
+            open={serializedImageModal}
+            onClose={() => setSerializedImageModal(false)}
+            serialRow={serialRow}
+            updateCounter={props.updateCounter}
+            setUpdateCounter={props.setUpdateCounter}
+            userEmail={props.userEmail}
+          />
+        )}
       </React.Fragment>
     )
   );
@@ -752,6 +943,7 @@ Row.propTypes = {
     quantity: PropTypes.number.isRequired,
     inDate: PropTypes.string,
     outDate: PropTypes.string,
+    consumables: PropTypes.bool,
     userEmail: PropTypes.string,
     serialData: PropTypes.oneOfType([
       PropTypes.arrayOf(
@@ -784,6 +976,7 @@ Row.propTypes = {
           totalPurchased: PropTypes.number,
           supplier: PropTypes.string,
           userEmail: PropTypes.string,
+          consumables: PropTypes.bool,
           unserializedOut: PropTypes.arrayOf(
             PropTypes.shape({
               id: PropTypes.number.isRequired,
@@ -864,6 +1057,7 @@ function SemiconductorTable({
                 outDate: serial.outDate,
                 paymentDate: serial.paymentDate,
                 supplier: serial.supplier,
+                imagePath: serial.imagePath,
                 userEmail: serial.userEmail,
                 customer: serial.customer,
                 warrantyEndDate: serial.warrantyEndDate,
@@ -887,13 +1081,16 @@ function SemiconductorTable({
               item.quantity,
               item.inDate,
               item.outDate,
+              item.consumables,
               item.userEmail,
               [],
               item.unserializedIn.map((nonserial) => ({
+                inventoryId: item.id,
                 unsID: nonserial.id,
                 condition: nonserial.condition,
                 status: nonserial.status,
                 manufacturer: nonserial.manufactureroem,
+                imagePath: nonserial.imagePath,
                 date: nonserial.date,
                 supplier: nonserial.supplier,
                 userEmail: nonserial.userEmail,
@@ -901,6 +1098,9 @@ function SemiconductorTable({
                 totalPurchased: nonserial.totalPurchased,
                 unitPrice: nonserial.unitPrice,
                 totalPrice: nonserial.totalPrice,
+                shippingPerBatch: nonserial.shippingPriceBatch,
+                customsPerBatch: nonserial.customsPerBatch,
+                warrantyEndDate: nonserial.warrantyEndDate,
                 conversionRate: nonserial.conversionRate,
                 currency: nonserial.currency,
                 source: nonserial.source,
@@ -967,7 +1167,7 @@ function SemiconductorTable({
                 Latest Out Date
               </TableCell>
               <TableCell align="right" sx={cellBorderStyle}>
-                Condition
+                Consumables
               </TableCell>
               <TableCell align="right" sx={cellBorderStyle}>
                 Status
@@ -1020,6 +1220,7 @@ function createData(
   quantity,
   inDate,
   outDate,
+  consumables,
   userEmail,
   serialData,
   unserialData
@@ -1029,6 +1230,7 @@ function createData(
     partNumber,
     description,
     type,
+    consumables,
     quantity,
     inDate,
     outDate,
