@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SerializedModal from "./SerializedModal";
 import UnserializedModal from "./UnserializedModal";
+import ConstraintModal from "./AddConstraintModal";
 
 const ActionButton = ({
   result,
@@ -15,13 +16,14 @@ const ActionButton = ({
   setUpdateCounter,
   showUpdateModal,
   setShowUpdateModal,
-  conversionRate
+  conversionRate,
 }) => {
   const [searchResults, setSearchResults] = useState([]);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showUnseriliazedModal, setUnserializedModal] = useState(false);
   const [poModal, setPoModal] = useState(false);
+  const [showConstraintModal, setConstraintModal] = useState(false);
 
   const handleSearchBy = (value) => {
     setSearchBy(value);
@@ -69,6 +71,9 @@ const ActionButton = ({
   const openModal = () => {
     setShowModal(true);
   };
+  const openConstraintModal = () => {
+    setConstraintModal(true);
+  };
 
   const closeModal = () => {
     setShowModal(false);
@@ -84,6 +89,10 @@ const ActionButton = ({
 
   const closeUnserializedModal = () => {
     setUnserializedModal(false);
+  };
+
+  const navigateToDocForm = () => {
+    navigate("/app/documentform");
   };
 
   return (
@@ -140,13 +149,16 @@ const ActionButton = ({
           className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64"
         >
           <li>
-            <a onClick={openPOmodal}>Generate/Add Via PO</a>
+            <a onClick={navigateToDocForm}>Generate/Add Via PO</a>
           </li>
-          <li>
+          {/*  <li>
             <a onClick={openModal}>Add New Part [Serialized]</a>
           </li>
           <li>
             <a onClick={openUnserializedModal}>Add New Part [Non-Serialized]</a>
+          </li> */}
+          <li>
+            <a onClick={openConstraintModal}>Add New Constraint</a>
           </li>
         </ul>
       </div>
@@ -197,7 +209,7 @@ const ActionButton = ({
           userEmail={userEmail}
           updateCounter={updateCounter}
           setUpdateCounter={setUpdateCounter}
-          
+          conversionRate={conversionRate}
         />
       )}
       {showUnseriliazedModal && (
@@ -208,7 +220,16 @@ const ActionButton = ({
           setUpdateCounter={setUpdateCounter}
           showUpdateModal={showUpdateModal}
           setShowUpdateModal={setShowUpdateModal}
-          conversionRate = {conversionRate}
+          conversionRate={conversionRate}
+        />
+      )}
+      {showConstraintModal && (
+        <ConstraintModal
+          onClose={() => setConstraintModal(false)}
+          userEmail={userEmail}
+          updateCounter={updateCounter}
+          setUpdateCounter={setUpdateCounter}
+          showConstraintModal={showConstraintModal}
         />
       )}
     </div>

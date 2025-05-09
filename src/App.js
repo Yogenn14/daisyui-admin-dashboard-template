@@ -14,6 +14,9 @@ import {
 } from "./app/refreshToken";
 import axios from "axios";
 import { checkAuth } from "./app/auth";
+import jwtDecode from 'jwt-decode';
+
+
 // Importing pages
 const Layout = lazy(() => import("./containers/Layout"));
 const Login = lazy(() => import("./pages/Login"));
@@ -30,12 +33,13 @@ const token = checkAuth();
 function App() {
   useEffect(() => {
     // 👆 daisy UI themes initialization
-    themeChange(false);
+    //themeChange(false);
+    document.documentElement.setAttribute('data-theme', 'light');
+
   }, []);
 
   useEffect(() => {
     const refreshAccessToken = async () => {
-      await refreshAccessTokenOnReload();
       await refreshAccessTokenOnInitialLoad();
     };
 
@@ -45,7 +49,7 @@ function App() {
   useEffect(() => {
     const refreshTokenInterval = async () => {
       const refreshToken = localStorage.getItem("refreshToken");
-
+  
       if (refreshToken) {
         try {
           const response = await axios.post(
@@ -53,26 +57,30 @@ function App() {
             { refreshToken }
           );
           const { accessToken } = response.data;
-
+  
           // Update access token in local storage
           localStorage.setItem("token", accessToken);
-
+  
           // Set access token in Axios default headers
           axios.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${accessToken}`;
-
+  
           console.log("Token refreshed");
         } catch (error) {
           console.error("Failed to refresh access token:", error);
+          // You might want to handle the error here, like logging out the user or notifying them
         }
       }
     };
-
+  
     const interval = setInterval(refreshTokenInterval, 1800000); // 30 minutes
-
+  
+    refreshTokenInterval(); // Initial call to ensure token is refreshed on start
+  
     return () => clearInterval(interval);
   }, []);
+  
 
   return (
     <>

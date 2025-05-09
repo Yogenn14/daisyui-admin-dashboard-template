@@ -51,7 +51,7 @@ const routes = [
     component: Calendar,
   },
   {
-    path: "/transactions",
+    path: "/contacts",
     component: Transactions,
   },
   {

@@ -60,6 +60,30 @@ function InternalPage() {
     }
   }, [dispatch]);
 
+  const [myrToUsdRate, setMyrToUsdRate] = useState(null);
+
+  useEffect(() => {
+  
+    const fetchExchangeRate = async () => {
+      try {
+        const response = await fetch(
+          "https://v6.exchangerate-api.com/v6/5cfc49340ef0b1550952197e/latest/USD"
+        );
+        const data = await response.json();
+        if (data.result === "success") {
+          setMyrToUsdRate(data.conversion_rates.MYR);
+        } else {
+          console.error("Failed to fetch exchange rate:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    };
+
+    fetchExchangeRate();
+  }, [dispatch]);
+
+
   const handleGeneratePO = () => {
     const combinedDataArray = [
       ...Object.entries(staticData).map(([key, value]) => ({
@@ -160,6 +184,7 @@ function InternalPage() {
               dynamicData={dynamicData}
               setDynamicData={setDynamicData}
               userEmail = {userEmail}
+              myrToUsdRate = {myrToUsdRate}
             />
           </div>
           <div className="text-center mt-4 lg:col-span-2">
@@ -190,6 +215,7 @@ function InternalPage() {
         onRequestClose={() => setValidationModalOpen(false)}
         combinedData={combinedData}
         userEmail = {userEmail}
+        conversionRate = {myrToUsdRate}
       />
     </div>
   );

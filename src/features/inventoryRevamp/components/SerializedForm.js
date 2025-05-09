@@ -1,58 +1,99 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { showNotification } from "../../common/headerSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 const SerializedForm = ({
   inventoryId,
-  partNumber,
-  partDescription,
   userEmail,
   closeModal,
   updateCounter,
   setUpdateCounter,
+  conversionRate,
 }) => {
   const [serialNumber, setSerialNumber] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [condition, setCondition] = useState("new");
   const [status, setStatus] = useState("");
   const [manufactureroem, setManufactureroem] = useState("");
-  const [unitPrice,setUnitPrice] = useState()
+  const [unitPrice, setUnitPrice] = useState("");
   const [inDate, setInDate] = useState("");
   const [outDate, setOutDate] = useState(null);
   const [supplier, setSupplier] = useState("");
   const [customer, setCustomer] = useState("");
-  const [warrantyEndDate,setwarrantyEndDate] = useState("");
+  const [warrantyEndDate, setWarrantyEndDate] = useState("");
+  const [currency, setCurrency] = useState("USD");
+  const [shippingPricePerUnit, setShippingPricePerUnit] = useState("");
+  const [customsPerUnit, setCustomsPerUnit] = useState("");
+  const [image, setImage] = useState(null); // State for the image
+  const [imagePreview, setImagePreview] = useState(null); // State for the image preview
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+
+    // Generate a preview URL for the image
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null); // Reset preview if no file is selected
+    }
+  };
+
   const handleSubmit = async (e) => {
-    setIsLoading(true);
     e.preventDefault();
+    setIsLoading(true);
     const id = inventoryId;
-    const newItem = {
-      serialNumber,
-      quantity,
-      condition,
-      status,
-      manufactureroem,
-      unitPrice,
-      inDate,
-      outDate,
-      userEmail,
-      supplier,
-      customer,   
-      warrantyEndDate,
-    };
-    console.log(newItem)
+
+    // Create a new FormData object
+    const formData = new FormData();
+    formData.append("serialNumber", serialNumber);
+    formData.append("quantity", quantity);
+    formData.append("condition", condition);
+    formData.append("status", status);
+    formData.append("manufactureroem", manufactureroem);
+    formData.append(
+      "unitPrice",
+      currency === "MYR" ? unitPrice / conversionRate : unitPrice
+    );
+    formData.append(
+      "shippingPricePerUnit",
+      currency === "MYR"
+        ? shippingPricePerUnit / conversionRate
+        : shippingPricePerUnit
+    );
+    formData.append(
+      "customsPerUnit",
+      currency === "MYR" ? customsPerUnit / conversionRate : customsPerUnit
+    );
+    formData.append("inDate", inDate);
+    formData.append("currency", currency);
+    formData.append("conversionRate", currency === "MYR" ? conversionRate : 0);
+    formData.append("userEmail", userEmail);
+    formData.append("supplier", supplier);
+    formData.append("customer", customer);
+    formData.append("warrantyEndDate", warrantyEndDate);
+    if (image) {
+      formData.append("image", image);
+    }
     try {
+      console.log("FormData contents:");
+      formData.forEach((value, key) => {
+        console.log(key, value);
+      });
       const response = await axios.post(
         `${process.env.REACT_APP_NODE_API_SERVER}inventory/addSerializedItem/${id}`,
-        newItem,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -84,7 +125,6 @@ const SerializedForm = ({
       role="dialog"
       aria-modal="true"
     >
-      <div>//Inv ID: {inventoryId}</div>
       <div className="sm:flex sm:items-start">
         <div className="mt-3  sm:mt-4 sm:text-left">
           <h3
@@ -104,21 +144,58 @@ const SerializedForm = ({
                 </div>
               )}
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow  input-xs"
                     placeholder="Serial Number"
                     value={serialNumber}
                     onChange={(e) => setSerialNumber(e.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  In Date
+                  <input
+                    type="date"
+                    className="grow  input-xs"
+                    placeholder="In Date"
+                    value={inDate}
+                    onChange={(e) => setInDate(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  Warranty End Date
+                  <input
+                    type="date"
+                    className="grow  input-xs"
+                    placeholder="Warranty End Date"
+                    value={warrantyEndDate}
+                    onChange={(e) => setWarrantyEndDate(e.target.value)}
                   />
                 </label>
               </div>
 
               <div className="mb-4">
-                <label className="flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  <input
+                    type="text"
+                    className="grow  input-xs"
+                    placeholder="Supplier"
+                    value={supplier}
+                    onChange={(e) => setSupplier(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center gap-2 input-sm">
                   <select
-                    className="grow select select-bordered"
+                    className="grow select-sm select select-bordered"
                     value={condition}
                     onChange={(e) => setCondition(e.target.value)}
                     required
@@ -129,11 +206,27 @@ const SerializedForm = ({
                   </select>
                 </label>
               </div>
+
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="flex items-center gap-2 input-sm">
+                  Currency
+                  <select
+                    className="grow select-sm select select-bordered"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    required
+                  >
+                    <option value="USD">USD</option>
+                    <option value="MYR">MYR</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow input-xs"
                     placeholder="Status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
@@ -142,10 +235,10 @@ const SerializedForm = ({
                 </label>
               </div>
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
                     type="text"
-                    className="grow"
+                    className="grow input-xs"
                     placeholder="Manufacturer OEM"
                     value={manufactureroem}
                     onChange={(e) => setManufactureroem(e.target.value)}
@@ -154,77 +247,131 @@ const SerializedForm = ({
                 </label>
               </div>
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
-                <input
-                  type="number"
-                   step="0.01"
-                  className="grow"
-                  placeholder="Unit Price"
-                  value={unitPrice}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Convert to float and handle NaN
-                    setUnitPrice(value === "" ? "" : parseFloat(value));
-                  }}
-                  required
-                />
-
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="grow input-xs"
+                    placeholder="Unit Price"
+                    value={unitPrice}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setUnitPrice(value === "" ? "" : parseFloat(value));
+                    }}
+                    required
+                  />
                 </label>
               </div>
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
-                  In Date
+                <label className="input input-bordered flex items-center gap-2 input-sm">
                   <input
-                    type="date"
-                    className="grow"
-                    value={inDate}
-                    onChange={(e) => setInDate(e.target.value)}
+                    type="number"
+                    step="0.01"
+                    className="grow input-xs"
+                    placeholder="Shipping Price Per Unit"
+                    value={shippingPricePerUnit}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setShippingPricePerUnit(
+                        value === "" ? "" : parseFloat(value)
+                      );
+                    }}
+                    required
+                  />
+                </label>
+              </div>
+              <div className="mb-4">
+                <label className="input input-bordered flex items-center gap-2 input-sm">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="grow input-xs"
+                    placeholder="Customs Per Unit"
+                    value={customsPerUnit}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setCustomsPerUnit(value === "" ? "" : parseFloat(value));
+                    }}
                     required
                   />
                 </label>
               </div>
 
+              {currency === "MYR" && (
+                <>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2 input-sm text-xs">
+                      Converted Unit Price
+                      <input
+                        type="text"
+                        className="grow input-xs"
+                        value={(unitPrice / conversionRate).toFixed(2)}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2 input-sm text-xs">
+                      Converted Shipping Price Per Unit
+                      <input
+                        type="text"
+                        className="grow input-xs"
+                        value={(shippingPricePerUnit / conversionRate).toFixed(
+                          2
+                        )}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                  <div className="mb-4">
+                    <label className="input input-bordered flex items-center gap-2 input-sm text-xs">
+                      Converted Customs Per Unit
+                      <input
+                        type="text"
+                        className="grow input-xs"
+                        value={(customsPerUnit / conversionRate).toFixed(2)}
+                        disabled
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
+
+              {/* New image input */}
               <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
-                  Warranty End Date
+                <label className=" flex items-center gap-2 input-sm">
                   <input
-                    type="date"
-                    className="grow"
-                    value={warrantyEndDate}
-                    onChange={(e) => setwarrantyEndDate(e.target.value)}
-                    required
+                    type="file"
+                    className="file-input input-bordered file-input-sm"
+                    onChange={handleImageChange}
+                    accept="image/*" // Optional: restrict to image files
                   />
                 </label>
               </div>
 
-              <div className="mb-4">
-                <label className="input input-bordered flex items-center gap-2">
-                  <input
-                    type="text"
-                    className="grow"
-                    placeholder="Supplier"
-                    value={supplier}
-                    onChange={(e) => setSupplier(e.target.value)}
-                    required
+              {/* Image preview */}
+              {imagePreview && (
+                <div className="mb-4">
+                  <img
+                    src={imagePreview}
+                    alt="Image Preview"
+                    className="rounded-md border-2 border-gray-300 max-h-48"
                   />
-                </label>
-              </div>
+                </div>
+              )}
 
-              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                <button
-                  type="submit"
-                  className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
-                >
-                  Add
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                  onClick={closeModal}
-                >
-                  Cancel
-                </button>
-              </div>
+              <button
+                type="submit"
+                className={`${
+                  isLoading ? "loading" : ""
+                } btn btn-sm btn-primary`}
+              >
+                Add Serialized Unit
+              </button>
+
+              <button className="btn btn-sm ml-2" onClick={closeModal}>
+                Close
+              </button>
             </form>
           </div>
         </div>

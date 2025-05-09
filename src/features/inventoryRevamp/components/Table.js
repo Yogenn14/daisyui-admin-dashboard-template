@@ -19,6 +19,12 @@ import ShipOutModal from "./ShipOutModal";
 import ShipOutUnsModal from "./ShipOutUnsModal";
 import UnserializedForm from "./UnserializedForm";
 import AddSerializedItem from "./AddSerializedItem";
+import EditSerializedModal from "./EditSerializedModal";
+import EditUnserializedModal from "./EditUnserializedModal";
+import RevertShipment from "./RevertShipment";
+import EditShippedOutModal from "./EditShippedOutModal";
+import ImageModal from "./ImageModal";
+import SerializedImageModal from "./SerializedImageModal";
 
 function Row(props) {
   const { row } = props;
@@ -32,13 +38,23 @@ function Row(props) {
   const [selectedUnsInvId, setSelectedUnsInvId] = useState(0);
   const [shipOutUnsModal, setshipOutUnsModal] = useState(false);
   const [outunsID, setoutunsID] = useState(0);
-  const [addSerializedItem,setAddSerializedItem] = useState(false);
-  const [selectedSerialPN,setSelectedSerialPN] = useState(0);
-  const [selectedSerialPD,setSelectedSerialPD] = useState(0);
-  const [selectedSerialInvID,setSelectedSerialInvID] = useState(0);
-
-
-
+  const [addSerializedItem, setAddSerializedItem] = useState(false);
+  const [selectedSerialPN, setSelectedSerialPN] = useState(0);
+  const [selectedSerialPD, setSelectedSerialPD] = useState(0);
+  const [selectedSerialInvID, setSelectedSerialInvID] = useState(0);
+  const [editSerializedModal, setEditSerializedModal] = useState(false);
+  const [selectedEditSerialized, setSelectedEditSerialized] = useState();
+  const [editUnserializedModal, seteditUnserializedModal] = useState(false);
+  const [selectedEditUnserialziedModal, setSelectedUnEditSerialized] =
+    useState();
+  const [selectedRevert, setSelectedRevert] = useState();
+  const [revertModal, setRevertModal] = useState(false);
+  const [editShippedOut, setEditShippedOut] = useState();
+  const [editShipOut, setEditShipOut] = useState(false);
+  const [imageModal, setImageModal] = useState(false);
+  const [imagePath, setImagePath] = useState();
+  const [serializedImageModal, setSerializedImageModal] = useState(false);
+  const [serialRow, setSerialRow] = useState();
 
   const handleShipOutClick = () => {
     setShipOutMode(!shipOutMode);
@@ -76,14 +92,45 @@ function Row(props) {
     setAddSerializedItem(true);
   };
 
-    const formatToMalaysianTime = (utcTime) => {
+  const handleEditSerializedModal = (serialRow) => {
+    //console.log("Editing serial row:", serialRow);
+
+    setSelectedEditSerialized(serialRow);
+    setEditSerializedModal(true);
+  };
+
+  const handleEditUnserializedModal = (unserialRow) => {
+    setSelectedUnEditSerialized(unserialRow);
+    seteditUnserializedModal(true);
+  };
+
+  const handleRevertShipment = (unserialRow) => {
+    setSelectedRevert(unserialRow);
+    setRevertModal(true);
+  };
+
+  const handleEditShippedOut = (unserialRow) => {
+    setEditShippedOut(unserialRow);
+    setEditShipOut(true);
+  };
+
+  const handleImageModal = (unserialRow) => {
+    setImageModal(true);
+    setImagePath(unserialRow);
+  };
+
+  const handleSerializedImageModal = (serialRow) => {
+    setSerializedImageModal(true);
+    setSerialRow(serialRow);
+  };
+
+  const formatToMalaysianTime = (utcTime) => {
     const date = new Date(utcTime);
     const options = {
       timeZone: "Asia/Kuala_Lumpur",
       year: "numeric",
       month: "long",
       day: "numeric",
-     
     };
     return date.toLocaleString("en-US", options);
   };
@@ -95,532 +142,782 @@ function Row(props) {
   };
 
   return (
-    console.log("row", row),
-    (
-      <React.Fragment>
-        <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-          <TableCell sx={cellBorderStyle}>
-            {row.type === "serialized" || row.type === "non-serialized" ? (
-              <IconButton
-                aria-label="expand row"
-                size="small"
-                onClick={() => setOpen(!open)}
-              >
-                {open ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
-              </IconButton>
-            ) : null}
-          </TableCell>
-          <TableCell component="th" scope="row" sx={cellBorderStyle}>
-            {row.partNumber}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.description}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.type}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.quantity}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {formatToMalaysianTime(row.inDate)}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.outDate === null ? "-" : formatToMalaysianTime(row.outDate)}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.type === "serialized" ? "-" : row.serialData.condition || "-"}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.type === "serialized" ? "-" : row.serialData.status || "-"}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.type === "serialized"
-              ? "-"
-              : row.serialData.manufacturer || "-"}
-          </TableCell>
-          <TableCell align="right" sx={cellBorderStyle}>
-            {row.userEmail}
-          </TableCell>
-        </TableRow>
-        {row.type === "serialized" && (
-          <>
-            <TableRow>
-              <TableCell
-                style={{ paddingBottom: 0, paddingTop: 0 }}
-                colSpan={12}
-              >
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                  <Box sx={{ margin: 1 }}>
+    <React.Fragment>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+        <TableCell sx={cellBorderStyle}>
+          {row.type === "serialized" || row.type === "non-serialized" ? (
+            <IconButton
+              aria-label="expand row"
+              size="small"
+              onClick={() => setOpen(!open)}
+            >
+              {open ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
+            </IconButton>
+          ) : null}
+        </TableCell>
+        <TableCell component="th" scope="row" sx={cellBorderStyle}>
+          {row.partNumber}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.description}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.type}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.quantity}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {formatToMalaysianTime(row.inDate) === "January 1, 1970"
+            ? "-"
+            : formatToMalaysianTime(row.inDate)}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.outDate === null ? "-" : formatToMalaysianTime(row.outDate)}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.consumables === true ? "Consumables" : "-"}
+        </TableCell>
+
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.type === "serialized" ? "-" : row.serialData.status || "-"}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.type === "serialized" ? "-" : row.serialData.manufacturer || "-"}
+        </TableCell>
+        <TableCell align="right" sx={cellBorderStyle}>
+          {row.userEmail}
+        </TableCell>
+      </TableRow>
+      {row.type === "serialized" && (
+        <>
+          <TableRow>
+            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+              <Collapse in={open} timeout="auto" unmountOnExit>
+                <Box sx={{ margin: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginBottom: 1,
+                      gap: 2,
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() =>
+                        handleSerializedIn(
+                          row.partNumber,
+                          row.description,
+                          row.id
+                        )
+                      }
+                    >
+                      Add
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={handleShipOutClick}
+                    >
+                      {shipOutMode ? "Cancel" : "Select"}
+                    </Button>
+                  </Box>
+                  <Table size="small" aria-label="serial details">
+                    <TableHead>
+                      <TableRow>
+                        {shipOutMode && (
+                          <TableCell sx={cellBorderStyle}>Ship Out</TableCell>
+                        )}
+                        <TableCell sx={cellBorderStyle}>
+                          Serial Number
+                        </TableCell>
+                        <TableCell sx={cellBorderStyle}>Condition</TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Status
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Manufacturer/OEM
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Image
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Currency
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Conversion Rate
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Unit Price (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Shipping Price Per Unit (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Customs Price Per Unit (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          In Date
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Warranty End Date
+                        </TableCell>
+
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Supplier
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Customer
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Out Date
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Payment Date
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Selling Price (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Profit (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          User Email
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Source
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Action
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {row?.serialData?.map((serialRow) => (
+                        <TableRow key={serialRow.serialNumber}>
+                          {shipOutMode && (
+                            <TableCell sx={cellBorderStyle}>
+                              <Checkbox
+                                checked={selectedSerialNumbers.includes(
+                                  serialRow.serialNumber
+                                )}
+                                onChange={() =>
+                                  handleCheckboxChange(serialRow.serialNumber)
+                                }
+                                disabled={!!serialRow.outDate}
+                              />
+                            </TableCell>
+                          )}
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            sx={cellBorderStyle}
+                          >
+                            {serialRow.serialNumber}
+                          </TableCell>
+                          <TableCell sx={cellBorderStyle}>
+                            {serialRow.condition}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.status}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.manufacturer}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            <div
+                              className="cursor-pointer"
+                              onClick={() =>
+                                handleSerializedImageModal(serialRow)
+                              }
+                            >
+                              IMG
+                            </div>
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.currency}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.conversionRate}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.unitPrice}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.shippingPricePerUnit}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.customsPerUnit}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {formatToMalaysianTime(serialRow.inDate)}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.warrantyEndDate
+                              ? formatToMalaysianTime(serialRow.warrantyEndDate)
+                              : "N/A"}
+                          </TableCell>
+
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.supplier}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.customer}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.outDate
+                              ? formatToMalaysianTime(serialRow.outDate)
+                              : ""}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.paymentDate
+                              ? formatToMalaysianTime(serialRow.paymentDate)
+                              : ""}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.sellingPrice}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.profit}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.userEmail}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            {serialRow.source}
+                          </TableCell>
+                          <TableCell align="right" sx={cellBorderStyle}>
+                            <div
+                              className="btn btn-sm"
+                              onClick={() =>
+                                handleEditSerializedModal(serialRow)
+                              }
+                            >
+                              Edit
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {shipOutMode && (
                     <Box
                       sx={{
                         display: "flex",
                         justifyContent: "flex-end",
-                        marginBottom: 1,
-                        gap: 2
+                        marginTop: 2,
                       }}
                     >
-                       <Button
-                           variant="contained"
-                           color="primary"
-                           size="small"
-                         onClick={() =>
-                          handleSerializedIn(
-                            row.partNumber,
-                            row.description,
-                            row.id
-                          )
-                        }
-                        >
-                          Add 
-                          </Button>
                       <Button
                         variant="contained"
+                        color="primary"
                         size="small"
-                        onClick={handleShipOutClick}
+                        onClick={handleShipOut}
                       >
-                        {shipOutMode ? "Cancel" : "Select"}
+                        Ship Out
                       </Button>
                     </Box>
-                    <Table size="small" aria-label="serial details">
-                      <TableHead>
-                        <TableRow>
-                          {shipOutMode && (
-                            <TableCell sx={cellBorderStyle}>Ship Out</TableCell>
-                          )}
-                          <TableCell sx={cellBorderStyle}>
-                            Serial Number
-                          </TableCell>
-                          <TableCell sx={cellBorderStyle}>Condition</TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Status
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Manufacturer/OEM
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Unit Price (USD)
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            In Date
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Warranty End Date
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Out Date
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Supplier
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Customer
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            User Email
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {row.serialData.map((serialRow) => (
-                          <TableRow key={serialRow.serialNumber}>
-                            {shipOutMode && (
-                              <TableCell sx={cellBorderStyle}>
-                                <Checkbox
-                                  checked={selectedSerialNumbers.includes(
-                                    serialRow.serialNumber
-                                  )}
-                                  onChange={() =>
-                                    handleCheckboxChange(serialRow.serialNumber)
-                                  }
-                                  disabled={!!serialRow.outDate}
-                                />
-                              </TableCell>
-                            )}
+                  )}
+                </Box>
+              </Collapse>
+            </TableCell>
+          </TableRow>
+        </>
+      )}
+      {row.type === "non-serialized" && (
+        <>
+          <TableRow>
+            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+              <Collapse in={open} timeout="auto" unmountOnExit>
+                <Box sx={{ margin: 1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginBottom: 1,
+                      gap: 1,
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() =>
+                        handleUnserializedIn(
+                          row.partNumber,
+                          row.description,
+                          row.id
+                        )
+                      }
+                    >
+                      Item In
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={handleShipOutClick}
+                    >
+                      Ship Out
+                    </Button>
+                  </Box>
+                  <Table
+                    size="small"
+                    aria-label="non-serialized details"
+                    className="mt-2"
+                  >
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={cellBorderStyle}>Condition</TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Status
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Manufacturer/OEM
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Image
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          In Date
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Warranty End Date
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Stock
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Total Added
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Unit Price (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Total Price (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Shipping Price Per Batch (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Customs Per Batch (USD)
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Currency
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Conversion Rate
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Supplier
+                        </TableCell>
+
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          User Email
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Source
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Action
+                        </TableCell>
+                        <TableCell align="right" sx={cellBorderStyle}>
+                          Customer Details
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {row.unserialData.map((unserialRow) => (
+                        <React.Fragment key={unserialRow.date}>
+                          <TableRow>
                             <TableCell
                               component="th"
                               scope="row"
                               sx={cellBorderStyle}
                             >
-                              {serialRow.serialNumber}
-                            </TableCell>
-                            <TableCell sx={cellBorderStyle}>
-                              {serialRow.condition}
+                              {unserialRow.condition}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.status}
+                              {unserialRow.status}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.manufacturer}
+                              {unserialRow.manufacturer}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.unitPrice}
+                              <div
+                                className="cursor-pointer"
+                                onClick={() => handleImageModal(unserialRow)}
+                              >
+                                IMG
+                              </div>
+                            </TableCell>
+
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {formatToMalaysianTime(unserialRow.date)}
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {formatToMalaysianTime(serialRow.inDate)}
+                              {unserialRow.warrantyEndDate
+                                ? formatToMalaysianTime(
+                                    unserialRow.warrantyEndDate
+                                  )
+                                : "-"}
+                            </TableCell>
+
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              <p
+                                className={
+                                  unserialRow.quantity < 5
+                                    ? "text-red-500"
+                                    : "text-black"
+                                }
+                              >
+                                {unserialRow.quantity}
+                              </p>
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                            {serialRow.warrantyEndDate ? formatToMalaysianTime(serialRow.warrantyEndDate) : "N/A"}
+                              <p>{unserialRow.totalPurchased}</p>
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                            {serialRow.outDate ? formatToMalaysianTime(serialRow.outDate) : "N/A"}
+                              <p>{unserialRow.unitPrice}</p>
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.supplier}
+                              <p>{unserialRow.totalPrice}</p>
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.customer}
+                              <p>{unserialRow.shippingPerBatch}</p>
                             </TableCell>
                             <TableCell align="right" sx={cellBorderStyle}>
-                              {serialRow.userEmail}
+                              <p>{unserialRow.customsPerBatch}</p>
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              <p>{unserialRow.currency}</p>
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              <p>
+                                {unserialRow.conversionRate === null || null
+                                  ? "0"
+                                  : unserialRow.conversionRate}
+                              </p>
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {unserialRow.supplier}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {unserialRow.userEmail}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {unserialRow.source}
+                            </TableCell>
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() =>
+                                  handleUnsShipOut(row.id, unserialRow.unsID)
+                                }
+                                disabled={unserialRow.quantity <= 0}
+                              >
+                                Ship Out
+                              </Button>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                sx={{ mt: 1 }}
+                                onClick={() =>
+                                  handleEditUnserializedModal(unserialRow)
+                                }
+                              >
+                                Edit
+                              </Button>
+                            </TableCell>
+
+                            <TableCell align="right" sx={cellBorderStyle}>
+                              {unserialRow.unserializedOut.length > 0 && (
+                                <Collapse
+                                  in={open}
+                                  timeout="auto"
+                                  unmountOnExit
+                                >
+                                  <Table
+                                    size="small"
+                                    aria-label="unserialized out details"
+                                  >
+                                    <TableHead>
+                                      <TableRow>
+                                        <TableCell sx={cellBorderStyle}>
+                                          Customer Name
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Out Date
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Payment Date
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Total Price Sold(USD)
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Quantity Out
+                                        </TableCell>
+
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Profit Per Unit (USD)
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Total Profit (USD)
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          User Email
+                                        </TableCell>
+                                        <TableCell
+                                          align="right"
+                                          sx={cellBorderStyle}
+                                        >
+                                          Action
+                                        </TableCell>
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {unserialRow.unserializedOut.map(
+                                        (outItem, idx) => (
+                                          <TableRow key={idx}>
+                                            <TableCell sx={cellBorderStyle}>
+                                              {outItem.customer}
+                                            </TableCell>
+
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {formatToMalaysianTime(
+                                                outItem.date
+                                              )}
+                                            </TableCell>
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {formatToMalaysianTime(
+                                                outItem.paymentDate
+                                              )}
+                                            </TableCell>
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {outItem.sellingPricePerUnit}
+                                            </TableCell>
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {outItem.quantity}
+                                            </TableCell>
+
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {outItem.profitPerUnit}
+                                            </TableCell>
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {outItem.totalProfit}
+                                            </TableCell>
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              {outItem.userEmail}
+                                            </TableCell>
+                                            <TableCell
+                                              align="right"
+                                              sx={cellBorderStyle}
+                                            >
+                                              <Button
+                                                variant="contained"
+                                                size="small"
+                                                sx={{ mt: 1 }}
+                                                onClick={() =>
+                                                  handleEditShippedOut(
+                                                    unserialRow
+                                                  )
+                                                }
+                                              >
+                                                Edit
+                                              </Button>
+                                              <Button
+                                                variant="contained"
+                                                size="small"
+                                                sx={{ mt: 1 }}
+                                                onClick={() =>
+                                                  handleRevertShipment(
+                                                    unserialRow
+                                                  )
+                                                }
+                                              >
+                                                REVERT
+                                              </Button>
+                                            </TableCell>
+                                          </TableRow>
+                                        )
+                                      )}
+                                    </TableBody>
+                                  </Table>
+                                </Collapse>
+                              )}
                             </TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    {shipOutMode && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          marginTop: 2,
-                        }}
-                      >
-                       
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={handleShipOut}
-                        >
-                          Ship Out
-                        </Button>
-                      </Box>
-                    )}
-                  </Box>
-                </Collapse>
-              </TableCell>
-            </TableRow>
-          </>
-        )}
-        {row.type === "non-serialized" && (
-          <>
-            <TableRow>
-              <TableCell
-                style={{ paddingBottom: 0, paddingTop: 0 }}
-                colSpan={12}
-              >
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                  <Box sx={{ margin: 1 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        marginBottom: 1,
-                        gap: 1,
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() =>
-                          handleUnserializedIn(
-                            row.partNumber,
-                            row.description,
-                            row.id
-                          )
-                        }
-                      >
-                        Item In
-                      </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={handleShipOutClick}
-                      >
-                        Ship Out
-                      </Button>
-                    </Box>
-                    <Table
-                      size="small"
-                      aria-label="non-serialized details"
-                      className="mt-2"
-                    >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={cellBorderStyle}>Condition</TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Status
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Manufacturer/OEM
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            In Date
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Stock
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Total Added
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Unit Price (USD)
-                          </TableCell> 
-                           <TableCell align="right" sx={cellBorderStyle}>
-                            Total Price (USD)
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Conversion Rate
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Supplier
-                          </TableCell>
-                          
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            User Email
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Action
-                          </TableCell>
-                          <TableCell align="right" sx={cellBorderStyle}>
-                            Customer Details
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {row.unserialData.map((unserialRow) => (
-                          <React.Fragment key={unserialRow.date}>
-                            <TableRow>
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                sx={cellBorderStyle}
-                              >
-                                {unserialRow.condition}
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                {unserialRow.status}
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                {unserialRow.manufacturer}
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                              {formatToMalaysianTime(unserialRow.date)}
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                <p
-                                  className={
-                                    unserialRow.quantity < 5
-                                      ? "text-red-500"
-                                      : "text-black"
-                                  }
-                                >
-                                  {unserialRow.quantity}
-                                </p>
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                <p>{unserialRow.totalPurchased}</p>
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                <p>{unserialRow.unitPrice}</p>
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                <p>{unserialRow.totalPrice}</p>
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                <p>{unserialRow.conversionRate === null || null ? "0" : unserialRow.conversionRate}</p>
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                {unserialRow.supplier}
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                {unserialRow.userEmail}
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  onClick={() =>
-                                    handleUnsShipOut(row.id, unserialRow.unsID)
-                                  }
-                                  disabled={unserialRow.quantity <= 0}
-                                >
-                                  Ship Out
-                                </Button>
-                              </TableCell>
-                              <TableCell align="right" sx={cellBorderStyle}>
-                                {unserialRow.unserializedOut.length > 0 && (
-                                  <Collapse
-                                    in={open}
-                                    timeout="auto"
-                                    unmountOnExit
-                                  >
-                                    <Table
-                                      size="small"
-                                      aria-label="unserialized out details"
-                                    >
-                                      <TableHead>
-                                        <TableRow>
-                                          <TableCell sx={cellBorderStyle}>
-                                            Customer Name
-                                          </TableCell>
-                                          <TableCell
-                                            align="right"
-                                            sx={cellBorderStyle}
-                                          >
-                                           Out Date
-                                          </TableCell>
-                                          <TableCell
-                                            align="right"
-                                            sx={cellBorderStyle}
-                                          >
-                                            Total Price Sold(USD)
-                                          </TableCell>
-                                          <TableCell
-                                            align="right"
-                                            sx={cellBorderStyle}
-                                          >
-                                            Quantity Out
-                                          </TableCell>
-                                         
-                                     
-                                          
-                                          <TableCell
-                                            align="right"
-                                            sx={cellBorderStyle}
-                                          >
-                                            Profit Per Unit (USD)
-                                          </TableCell>
-                                          <TableCell
-                                            align="right"
-                                            sx={cellBorderStyle}
-                                          >
-                                            Total Profit (USD)
-                                          </TableCell>
-                                          <TableCell
-                                            align="right"
-                                            sx={cellBorderStyle}
-                                          >
-                                            User Email
-                                          </TableCell>
-                                        </TableRow>
-                                      </TableHead>
-                                      <TableBody>
-                                        {unserialRow.unserializedOut.map(
-                                          (outItem, idx) => (
-                                            <TableRow key={idx}>
-                                              <TableCell sx={cellBorderStyle}>
-                                                {outItem.customer}
-                                              </TableCell>
-                                              <TableCell
-                                                align="right"
-                                                sx={cellBorderStyle}
-                                              >
-                                                {formatToMalaysianTime(outItem.date)}
-                                              </TableCell>
-                                              <TableCell
-                                                align="right"
-                                                sx={cellBorderStyle}
-                                              >
-                                                {outItem.sellingPricePerUnit}
-                                              </TableCell>
-                                              <TableCell
-                                                align="right"
-                                                sx={cellBorderStyle}
-                                              >
-                                                {outItem.quantity}
-                                              </TableCell>
-                                             
-                                            
-                                           
-                                              <TableCell
-                                                align="right"
-                                                sx={cellBorderStyle}
-                                              >
-                                                {outItem.profitPerUnit}
-                                              </TableCell>
-                                              <TableCell
-                                                align="right"
-                                                sx={cellBorderStyle}
-                                              >
-                                                {outItem.totalProfit}
-                                              </TableCell>
-                                              <TableCell
-                                                align="right"
-                                                sx={cellBorderStyle}
-                                              >
-                                                {outItem.userEmail}
-                                              </TableCell>
-                                            </TableRow>
-                                          )
-                                        )}
-                                      </TableBody>
-                                    </Table>
-                                  </Collapse>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          </React.Fragment>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Box>
-                </Collapse>
-              </TableCell>
-            </TableRow>
-          </>
-        )}
+                        </React.Fragment>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
+              </Collapse>
+            </TableCell>
+          </TableRow>
+        </>
+      )}
 
-        {shipModal && (
-          <ShipOutModal
-            open={shipModal}
-            onClose={() => setShipModal(false)}
-            serialNumbers={selectedSerialNumbers}
-            userEmail={props.userEmail}
-            updateCounter={props.updateCounter}
-            setUpdateCounter={props.setUpdateCounter}
-          />
-        )}
-        {shipOutUnsModal && (
-          <ShipOutUnsModal
-            open={shipOutUnsModal}
-            setshipOutUnsModal={setshipOutUnsModal}
-            selectedUnsInvId={selectedUnsInvId}
-            outunsID={outunsID}
-            userEmail = {props.userEmail}
-            updateCounter={props.updateCounter}
-            setUpdateCounter={props.setUpdateCounter}
-          />
-        )}
-        {unserializedModal && (
-          <UnserializedForm
-            open={unserializedModal}
-            closeModal={() => setunserializedModal(false)}
-            partNumber={selectedUnsPN}
-            partDescription={selectedUnsPD}
-            inventoryId={selectedUnsInvId}
-            userEmail={props.userEmail}
-            updateCounter={props.updateCounter}
-            setUpdateCounter={props.setUpdateCounter}
-            conversionRate = {[props.conversionRate]}
-          />
-        )}
-        {addSerializedItem && (
-          <AddSerializedItem
-          open = {addSerializedItem}
-          closeModal = {() => setAddSerializedItem(false)}
-          partNumber = {selectedSerialPN}
-          partDescription = {selectedSerialPD}
-          inventoryId = {selectedSerialInvID}
+      {shipModal && (
+        <ShipOutModal
+          open={shipModal}
+          onClose={() => setShipModal(false)}
+          serialNumbers={selectedSerialNumbers}
           userEmail={props.userEmail}
           updateCounter={props.updateCounter}
           setUpdateCounter={props.setUpdateCounter}
-          
-          />
-        )}
-      </React.Fragment>
-    )
+        />
+      )}
+      {shipOutUnsModal && (
+        <ShipOutUnsModal
+          open={shipOutUnsModal}
+          setshipOutUnsModal={setshipOutUnsModal}
+          selectedUnsInvId={selectedUnsInvId}
+          outunsID={outunsID}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+        />
+      )}
+      {unserializedModal && (
+        <UnserializedForm
+          open={unserializedModal}
+          closeModal={() => setunserializedModal(false)}
+          partNumber={selectedUnsPN}
+          partDescription={selectedUnsPD}
+          inventoryId={selectedUnsInvId}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+          conversionRate={[props.conversionRate]}
+        />
+      )}
+      {addSerializedItem && (
+        <AddSerializedItem
+          open={addSerializedItem}
+          closeModal={() => setAddSerializedItem(false)}
+          partNumber={selectedSerialPN}
+          partDescription={selectedSerialPD}
+          inventoryId={selectedSerialInvID}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+          conversionRate={props.conversionRate}
+        />
+      )}
+
+      {editSerializedModal && (
+        <EditSerializedModal
+          open={editSerializedModal}
+          closeModal={() => setEditSerializedModal(false)}
+          selectedEditSerialized={selectedEditSerialized}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+          conversionRate={props.conversionRate}
+        />
+      )}
+
+      {editUnserializedModal && (
+        <EditUnserializedModal
+          open={editUnserializedModal}
+          onClose={() => seteditUnserializedModal(false)}
+          selectedEditUnserialziedModal={selectedEditUnserialziedModal}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+          conversionRate={props.conversionRate}
+        />
+      )}
+
+      {revertModal && (
+        <RevertShipment
+          open={revertModal}
+          onClose={() => setRevertModal(false)}
+          selectedRevert={selectedRevert}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+        />
+      )}
+
+      {editShipOut && (
+        <EditShippedOutModal
+          open={revertModal}
+          onClose={() => setEditShipOut(false)}
+          editShippedOut={editShippedOut}
+          userEmail={props.userEmail}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+        />
+      )}
+      {imageModal && (
+        <ImageModal
+          open={imageModal}
+          onClose={() => setImageModal(false)}
+          imagePath={imagePath}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+          userEmail={props.userEmail}
+        />
+      )}
+
+      {serializedImageModal && (
+        <SerializedImageModal
+          open={serializedImageModal}
+          onClose={() => setSerializedImageModal(false)}
+          serialRow={serialRow}
+          updateCounter={props.updateCounter}
+          setUpdateCounter={props.setUpdateCounter}
+          userEmail={props.userEmail}
+        />
+      )}
+    </React.Fragment>
   );
 }
 
@@ -633,6 +930,7 @@ Row.propTypes = {
     quantity: PropTypes.number.isRequired,
     inDate: PropTypes.string,
     outDate: PropTypes.string,
+    consumables: PropTypes.bool,
     userEmail: PropTypes.string,
     serialData: PropTypes.oneOfType([
       PropTypes.arrayOf(
@@ -665,6 +963,7 @@ Row.propTypes = {
           totalPurchased: PropTypes.number,
           supplier: PropTypes.string,
           userEmail: PropTypes.string,
+          consumables: PropTypes.bool,
           unserializedOut: PropTypes.arrayOf(
             PropTypes.shape({
               id: PropTypes.number.isRequired,
@@ -694,7 +993,7 @@ function SemiconductorTable({
   setUpdateCounter,
   showUpdateModal,
   setShowUpdateModal,
-  conversionRate
+  conversionRate,
 }) {
   const [rows, setRows] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -734,18 +1033,30 @@ function SemiconductorTable({
               item.inDate,
               item.outDate,
               item.userEmail,
+              [],
               item.serializedItems?.map((serial) => ({
+                inventoryId: item.id,
+                id: serial.id,
                 serialNumber: serial.serialNumber,
                 condition: serial.condition,
                 status: serial.status,
                 manufacturer: serial.manufactureroem,
                 inDate: serial.inDate,
                 outDate: serial.outDate,
+                paymentDate: serial.paymentDate,
                 supplier: serial.supplier,
+                imagePath: serial.imagePath,
                 userEmail: serial.userEmail,
                 customer: serial.customer,
                 warrantyEndDate: serial.warrantyEndDate,
-                unitPrice : serial.unitPrice
+                currency: serial.currency,
+                conversionRate: serial.conversionRate,
+                unitPrice: serial.unitPrice,
+                shippingPricePerUnit: serial.shippingPricePerUnit,
+                customsPerUnit: serial.customsPerUnit,
+                sellingPrice: serial.sellingPrice,
+                profit: serial.profit,
+                source: serial.source,
               })),
               []
             );
@@ -758,13 +1069,16 @@ function SemiconductorTable({
               item.quantity,
               item.inDate,
               item.outDate,
+              item.consumables,
               item.userEmail,
               [],
               item.unserializedIn.map((nonserial) => ({
+                inventoryId: item.id,
                 unsID: nonserial.id,
                 condition: nonserial.condition,
                 status: nonserial.status,
                 manufacturer: nonserial.manufactureroem,
+                imagePath: nonserial.imagePath,
                 date: nonserial.date,
                 supplier: nonserial.supplier,
                 userEmail: nonserial.userEmail,
@@ -772,19 +1086,23 @@ function SemiconductorTable({
                 totalPurchased: nonserial.totalPurchased,
                 unitPrice: nonserial.unitPrice,
                 totalPrice: nonserial.totalPrice,
-                conversionRate : nonserial.conversionRate,
-
+                shippingPerBatch: nonserial.shippingPriceBatch,
+                customsPerBatch: nonserial.customsPerBatch,
+                warrantyEndDate: nonserial.warrantyEndDate,
+                conversionRate: nonserial.conversionRate,
+                currency: nonserial.currency,
+                source: nonserial.source,
                 unserializedOut: nonserial.unserializedOut.map((outItem) => ({
                   id: outItem.id,
                   unserializedInId: outItem.unserializedInId,
                   customer: outItem.customer,
                   quantity: outItem.quantity,
                   date: outItem.date,
-                  sellingPricePerUnit : outItem.shipOutPrice,
+                  sellingPricePerUnit: outItem.shipOutPrice,
                   profitPerUnit: outItem.profitPerUnit,
                   totalProfit: outItem.totalProfit,
                   userEmail: outItem.userEmail,
-                  
+                  paymentDate: outItem.paymentDate,
                 })),
               }))
             );
@@ -813,8 +1131,6 @@ function SemiconductorTable({
 
   const cellBorderStyle = { borderRight: "1px solid rgba(224, 224, 224, 1)" };
 
-
-
   return (
     <>
       <TableContainer component={Paper}>
@@ -839,7 +1155,7 @@ function SemiconductorTable({
                 Latest Out Date
               </TableCell>
               <TableCell align="right" sx={cellBorderStyle}>
-                Condition
+                Consumables
               </TableCell>
               <TableCell align="right" sx={cellBorderStyle}>
                 Status
@@ -862,7 +1178,7 @@ function SemiconductorTable({
                   setUpdateCounter={setUpdateCounter}
                   setShowUpdateModal={setShowUpdateModal}
                   showUpdateModal={showUpdateModal}
-                  conversionRate = {conversionRate}
+                  conversionRate={conversionRate}
                 />
               </React.Fragment>
             ))}
@@ -892,6 +1208,7 @@ function createData(
   quantity,
   inDate,
   outDate,
+  consumables,
   userEmail,
   serialData,
   unserialData
@@ -901,6 +1218,7 @@ function createData(
     partNumber,
     description,
     type,
+    consumables,
     quantity,
     inDate,
     outDate,

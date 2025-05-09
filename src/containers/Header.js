@@ -16,22 +16,22 @@ function Header() {
   const { noOfNotifications, pageTitle } = useSelector((state) => state.header);
   const [image, setImage] = useState("");
   const [currentTheme, setCurrentTheme] = useState(
-    localStorage.getItem("theme")
+    localStorage.getItem("light")
   );
 
   useEffect(() => {
-    themeChange(false);
+   /*   themeChange(false);
     if (currentTheme === null) {
       if (
         window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
+        window.matchMedia("(prefers-color-scheme: light)").matches
       ) {
-        setCurrentTheme("dark");
+        setCurrentTheme("light");
       } else {
         setCurrentTheme("light");
       }
-    }
-
+    } */
+ 
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -88,7 +88,7 @@ function Header() {
                 </select> */}
 
           {/* Light and dark theme selection toogle **/}
-          <label className="swap ">
+      {/*     <label className="swap ">
             <input type="checkbox" />
             <SunIcon
               data-set-theme="light"
@@ -106,10 +106,10 @@ function Header() {
                 (currentTheme === "light" ? "swap-on" : "swap-off")
               }
             />
-          </label>
+          </label> */}
 
           {/* Notification icon */}
-          <button
+        {/*   <button
             className="btn btn-ghost ml-4  btn-circle"
             onClick={() => openNotification()}
           >
@@ -121,15 +121,15 @@ function Header() {
                 </span>
               ) : null}
             </div>
-          </button>
+          </button> */}
 
           {/* Profile icon, opening menu on click */}
           <div className="dropdown dropdown-end ml-4">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">
                 <img
-                  src={`${process.env.REACT_APP_SERVER_BASE_URL}/profileImg/${image}`}
-                  alt=""
+              src={`${process.env.REACT_APP_SERVER_BASE_URL}/profileImg/${image || 'blank.png'}`}                 
+               alt=""
                 />
               </div>
             </label>

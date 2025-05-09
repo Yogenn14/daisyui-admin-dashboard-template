@@ -3,7 +3,7 @@ import EmptyModalTemplate from "./EmptyModalTemplate";
 import { useDispatch } from "react-redux";
 import { showNotification } from "../common/headerSlice";
 
-const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
+const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail, myrToUsdRate }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [additionalModal, setaddtionalModal] = useState(false);
   const [message, setMessage] = useState("");
@@ -646,6 +646,35 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                     onChange={handleItemChange}
                   />
                 </div>
+               
+                  {dynamicData.moc === 'MYR' &&    <div>
+                  <label className="block text-gray-700 text-sm  mb-2">
+                   Current Conversion Rate:
+                  </label>
+                  <input
+                    name="unitPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline input input-disabled"
+                    value={myrToUsdRate}
+                    disabled
+                  />
+                  <label className="block text-gray-700 text-sm  mb-2">
+                   Converted Unit Price:
+                  </label>
+                  <input
+                    name="unitPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline input input-disabled"
+                    value={item.unitPrice / myrToUsdRate}
+                    onChange={handleItemChange}
+                    disabled
+                  />
+                </div> }
+              
                 <div>
                   <label className="block text-gray-700 text-sm  mb-2">
                     Amount
@@ -656,7 +685,7 @@ const DynamicDataForm = ({ dynamicData, setDynamicData, userEmail }) => {
                     min="0"
                     step="0.01"
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={item.amount = item.quantity * item.unitPrice}
+                    value={item.amount= item.quantity * item.unitPrice}
                   />
                 </div>
                 <button
